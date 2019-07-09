@@ -73,7 +73,7 @@ def get_img_from_url(url):
 
 
 def _predict(img):
-    face_list, delta_t = common_util.timeit(get_face_list(img))
+    face_list, delta_t = common_util.timeit(get_face_list, img)
     logger.debug("dlib face: [elapsed]:{}".format(delta_t))
     if len(face_list) == 0:
         return None, "no frontal-face detected."
@@ -123,7 +123,7 @@ from django.http import HttpResponse
 def predict(request):
     params = request.GET
     if 'img_url' in params and 'id' in params:
-        img, delta_t = common_util.timeit(get_img_from_url(params['img_url']))
+        img, delta_t = common_util.timeit(get_img_from_url, params['img_url'])
         logger.debug("load img: [url]: {} [elapsed]: {}".format(params['img_url'], delta_t))
         if img is None:
             json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': 'load image fail'}]})

@@ -78,7 +78,7 @@ from django.http import HttpResponse
 def predict(request):
     params = request.GET
     if 'img_url' in params and 'id' in params:
-        img, delta_t = common_util.timeit(get_img_from_url(params['img_url']))
+        img, delta_t = common_util.timeit(get_img_from_url, params['img_url'])
         logger.debug("load img: [url]: {} [elapsed]: {}".format(params['img_url'], delta_t))
         if img is None:
             logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))

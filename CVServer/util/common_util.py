@@ -22,8 +22,8 @@ def deco_timeit(func):
     return wrapper
 
 
-def timeit(func):
+def timeit(func, *args, **kwargs):
     b = time.time()
-    result = func
+    result = func(*args, **kwargs)
     e = time.time()
     return result, round(e - b, 4)
