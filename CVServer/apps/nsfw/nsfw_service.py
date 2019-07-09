@@ -4,13 +4,10 @@
 # prepare
 ##########
 import json
-import logging
-logging.basicConfig(level = logging.INFO,format = '|%(asctime)s| [%(levelname)s] %(name)s - %(message)s')
-logger = logging.getLogger(__name__)
-# logger.info("Start print log")
-# logger.debug("Do something")
-# logger.warning("Something maybe fail.")
-# logger.info("Finish")
+from ...util.logger import Logger
+from ...util import path
+
+logger = Logger('gender_service', log2console=False, log2file=True, logfile=path.NSFW_LOG_PATH).get_logger()
 
 #########
 # cv part

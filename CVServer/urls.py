@@ -14,16 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url,include
+from django.conf.urls import url
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls.resolvers import RegexURLPattern
-from django.urls.resolvers import RegexURLResolver
-from . import basic_view 
-from .apps import age_service
-# from . import age_service
-# from . import gender_service
-# from . import nsfw_service
+from . import basic_view
+from .apps.age import age_service
+from .apps.gender import gender_service
+from .apps.nsfw import nsfw_service
 import json
 
 def api_index(request):
@@ -46,7 +44,7 @@ urlpatterns = [
 	url(r'^$', api_index),
     url(r'api_index',api_index),
 	url(r'hello_post', basic_view.hello_post),
-	url(r'age', age_service.predict)
-	# url(r'gender', include("gender.urls")),
-    # url(r'nsfw', include("nsfw.urls"))
+	url(r'age', age_service.predict),
+	url(r'gender', "gender.urls"),
+    url(r'nsfw', "nsfw.urls")
 ]

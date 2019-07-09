@@ -4,17 +4,10 @@
 # prepare
 ##########
 import json
-import logging
-import os
-logging.basicConfig(level = logging.INFO,format = '|%(asctime)s| [%(levelname)s] %(name)s - %(message)s')
-# log 文件
-fn = os.path.dirname(__file__)+os.path.splittext(__file__)[0]+".log"
-handler = logging.handlers.TimedRotatingFileHandler(fn,when="D",interval=1,backupCount=15)
-handler.setLevel(logging.INFO)
-handler.setFormatter(logging.Formatter('|%(asctime)s| [%(levelname)s] %(name)s - %(message)s'))
-# logger
-logger = logging.getLogger(__name__)
-logger.addHandler(handler)
+from ...util.logger import Logger
+from ...util import path
+
+logger = Logger('gender_service', log2console=False, log2file=True, logfile=path.AGE_LOG_PATH).get_logger()
 
 
 
