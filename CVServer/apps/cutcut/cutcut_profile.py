@@ -38,8 +38,9 @@ def request_nlp(title, content):
 #################
 from django.http import HttpResponse
 from django.http import HttpRequest
+from django.views.decorators.csrf import csrf_exempt
 
-
+@csrf_exempt
 def profile(request):
     if request.method == "POST":
         # params-check

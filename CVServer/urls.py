@@ -18,6 +18,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls.resolvers import RegexURLPattern
+from django.views.decorators.csrf import csrf_exempt
 from . import basic_view
 from .apps.age import age_service
 from .apps.gender import gender_service
@@ -51,5 +52,5 @@ urlpatterns = [
     url(r'age', age_service.predict),
     url(r'gender', gender_service.predict),
     url(r'nsfw', nsfw_service.predict),
-    url(r'cutcut_profile', cutcut_profile.profile)
+    url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile))
 ]
