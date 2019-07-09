@@ -40,6 +40,7 @@ from django.http import HttpResponse
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 
+
 @csrf_exempt
 def profile(request):
     if request.method == "POST":
@@ -49,6 +50,7 @@ def profile(request):
         id_ = params.get("id")
         title = params.get("title")
         desc = params.get("description")
+        logger.debug(" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title, desc))
         # features
         res_dict = {}
         # CV features
