@@ -5,9 +5,9 @@
 ##########
 import json
 from ...util.logger import Logger
-from ...util import path
+from ...util import config
 
-logger = Logger('gender_service', log2console=False, log2file=True, logfile=path.GENDER_LOG_PATH).get_logger()
+logger = Logger('gender_service', log2console=False, log2file=True, logfile=config.GENDER_LOG_PATH).get_logger()
 
 #########
 # cv part
@@ -120,11 +120,11 @@ from django.http import HttpResponse
 
 def predict(request):
     params = request.GET
-    if 'url' in params and 'id' in params:
-        img = get_img_from_url(params['url'])
+    if 'img_url' in params and 'id' in params:
+        img = get_img_from_url(params['img_url'])
         if img is None:
             json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': 'load image fail'}]})
-            logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['url']))
+            logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['img_url']))
         else:
             (res_list, remark) = _predict(img)
             if (res_list is None):
@@ -136,4 +136,4 @@ def predict(request):
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
         return HttpResponse(json_str, status=200)
     else:
-        return HttpResponse("use GET, param: 'url', 'id'", status=400)
+        return HttpResponse("use GET, param: 'img_url', 'id'", status=400)
