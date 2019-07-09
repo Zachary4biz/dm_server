@@ -16,7 +16,8 @@ if not os.path.exists(LOGDIR):
 AGE_LOG_PATH = os.path.join(LOGDIR, "age_service.log")
 GENDER_LOG_PATH = os.path.join(LOGDIR, "gender_service.log")
 NSFW_LOG_PATH = os.path.join(LOGDIR, "nsfw_service.log")
+CUTCUT_LOG_PATH = os.path.join(LOGDIR, "cutcut_profile.log")
 
 class NLP():
-    tag_port = ""
-    kw_port = ""
+    tag_port = "http://newsprofile-keywords.internalapus.com/segment/tags.jsp"
+    kw_port = "http://newsprofile-keywords.internalapus.com/segment/keywords.jsp"
