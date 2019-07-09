@@ -10,7 +10,9 @@ def __get_dir(fn=__file__, level=0):
 
 BASEPATH = __get_dir(__file__, 2)
 LOGDIR = os.path.join(BASEPATH, "logs")
+if not os.path.exists(LOGDIR):
+    os.mkdir(LOGDIR)
 
-AGE_LOG_PATH = os.path.join(BASEPATH, "logs", "age_service.log")
-GENDER_LOG_PATH = os.path.join(BASEPATH, "logs", "gender_service.log")
-NSFW_LOG_PATH = os.path.join(BASEPATH, "logs", "nsfw_service.log")
+AGE_LOG_PATH = os.path.join(LOGDIR, "age_service.log")
+GENDER_LOG_PATH = os.path.join(LOGDIR, "gender_service.log")
+NSFW_LOG_PATH = os.path.join(LOGDIR, "nsfw_service.log")
