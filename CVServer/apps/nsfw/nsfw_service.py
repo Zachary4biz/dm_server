@@ -58,8 +58,7 @@ def get_img_from_url(url):
 
 def _predict(img):
     img_pro = pre_process_img(img)
-    predictionsForImage = modelClassifier.predict(img_pro)
-    pred = predictionsForImage[0]
+    pred = modelClassifier.predict(img_pro)[0]
     confidence = round(pred[pred.argmax()], 4)
     return {"id": pred.argmax(), "prob": confidence}
 

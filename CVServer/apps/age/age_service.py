@@ -81,7 +81,7 @@ def _predict(img):
     face_list, delta_t = common_util.timeit(get_face_list(img))
     logger.debug("dlib face: [elapsed]:{}".format(delta_t))
     if len(face_list) == 0:
-        return (None, "no frontal-face detected.")
+        return None, "no frontal-face detected."
     else:
         face_list = [pre_process_img(i) for i in face_list]
         res_list = []
@@ -89,7 +89,7 @@ def _predict(img):
             pred = modelClassifier.predict(face)[0]
             confidence = round(pred[pred.argmax()], 4)
             res_list.append({"id": pred.argmax(), "prob": confidence})
-        return (res_list, "success")
+        return res_list, "success"
 
 
 #############

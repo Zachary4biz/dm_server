@@ -86,7 +86,7 @@ def _predict(img):
             pred = predictionsForImage[0]
             confidence = round(pred[pred.argmax()], 4)
             res_list.append({"id": pred.argmax(), "prob": confidence})
-        return (res_list, "success")
+        return res_list, "success"
 
 
 #############
