@@ -45,6 +45,6 @@ urlpatterns = [
     url(r'api_index',api_index),
 	url(r'hello_post', basic_view.hello_post),
 	url(r'age', age_service.predict),
-	url(r'gender', "gender.urls"),
-    url(r'nsfw', "nsfw.urls")
+	url(r'gender', gender_service.predict),
+    url(r'nsfw', nsfw_service.predict)
 ]
