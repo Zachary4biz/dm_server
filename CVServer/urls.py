@@ -22,7 +22,7 @@ from . import basic_view
 from .apps.age import age_service
 from .apps.gender import gender_service
 from .apps.nsfw import nsfw_service
-from .apps.cutcut import cutcut_service
+from .apps.cutcut import cutcut_profile
 import json
 
 
@@ -51,5 +51,5 @@ urlpatterns = [
     url(r'age', age_service.predict),
     url(r'gender', gender_service.predict),
     url(r'nsfw', nsfw_service.predict),
-    url(r'cutcut_profile', cutcut_service.profile)
+    url(r'cutcut_profile', cutcut_profile.profile)
 ]
