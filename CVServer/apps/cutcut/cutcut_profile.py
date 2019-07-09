@@ -57,9 +57,10 @@ def profile(request):
         inner_request = HttpRequest()
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
-        age_res = json.loads(age_service.predict(inner_request))["result"]
-        gender_res = json.loads(gender_service.predict(inner_request))["result"]
-        nsfw_res = json.loads(nsfw_service.predict(inner_request))["result"]
+
+        age_res = json.loads(age_service.predict(inner_request).content)["result"]
+        gender_res = json.loads(gender_service.predict(inner_request).content)["result"]
+        nsfw_res = json.loads(nsfw_service.predict(inner_request).content)["result"]
         # NLP features
         nlp_res_dict = request_nlp(title, desc)
         # return
@@ -67,7 +68,7 @@ def profile(request):
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         logger.info(res_jsonstr)
-        return HttpResponse(res_jsonstr, status=200)
+        return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
         return HttpResponse("use POST, param: 'title', 'description','img_ur','id'", status=400)
