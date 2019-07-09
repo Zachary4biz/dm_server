@@ -15,8 +15,14 @@ print(requests.get("http://10.65.32.218:8000/api_index").text)
 for id_, url in img_list:
     print(">>>{}".format(id_))
     b = time.time()
-    print("  年龄 of {}: ".format(id_) + requests.get("http://10.65.32.218:8000/age?url={}&id={}".format(url, id_)).text + " time:{}".format(time.time() - b))
+    res = requests.get("http://10.65.32.218:8000/age?img_url={}&id={}".format(url, id_)).text
+    e = time.time()
+    print("  年龄 of {}: [res]:{} [time]:{}".format(id_, res, str(e-b)))
     b = time.time()
-    print("  性别 of {}: ".format(id_) + requests.get("http://10.65.32.218:8000/gender?url={}&id={}".format(url, id_)).text + " time:{}".format(time.time() - b))
+    res = requests.get("http://10.65.32.218:8000/gender?img_url={}&id={}".format(url, id_)).text
+    e = time.time()
+    print("  性别 of {}: [res]:{} [time]:{}".format(id_, res, str(e-b)))
     b = time.time()
-    print("  鉴黄 of {}: ".format(id_) + requests.get("http://10.65.32.218:8000/nsfw?url={}&id={}".format(url, id_)).text) + " time:{}".format(time.time() - b)
+    res = requests.get("http://10.65.32.218:8000/nsfw?img_url={}&id={}".format(url, id_)).text
+    e = time.time()
+    print("  鉴黄 of {}: [res]:{} [time]:{}".format(id_, res, str(e - b)))
