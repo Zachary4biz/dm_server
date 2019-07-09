@@ -13,16 +13,15 @@ meanFileInput = "model/googlenetmeanbgr.npy"
 imgPath = '/mnt/shared/libcaffe2/shenhe/group/2'
 
 mean = np.load(meanFileInput)
-mean = mean[:,:227,:227]
+mean = mean[:, :227, :227]
 print(mean)
 
 modelClassifier = caffe.Classifier(modelDefInput, pretrainedModelInput,
-            image_dims=[256,256], mean=mean, raw_scale=255.0, channel_swap=(2,1,0))
-
+                                   image_dims=[256, 256], mean=mean, raw_scale=255.0, channel_swap=(2, 1, 0))
 
 modelNamesFile = [
-'female',
-'male',
+    'female',
+    'male',
 ]
 
 filelists = os.listdir(imgPath)
@@ -31,14 +30,14 @@ for file in filelists:
     imgFile = imgPath + '/' + file
 
     if 1:
-    	image1=cv2.imread(imgFile)
-    	image1=cv2.cvtColor(image1,cv2.COLOR_BGR2RGB)
-    	image1=image1/255.
-    	inputs = [image1]
+        image1 = cv2.imread(imgFile)
+        image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
+        image1 = image1 / 255.
+        inputs = [image1]
     else:
-    	inputs = [caffe.io.load_image(imgFile)]
-    	# print(inputs)
-            
+        inputs = [caffe.io.load_image(imgFile)]
+    # print(inputs)
+
     predictionsForImage = modelClassifier.predict(inputs)
     pred = predictionsForImage.reshape((len(modelNamesFile)))
     predictionName = modelNamesFile[pred.argmax()]
@@ -47,7 +46,7 @@ for file in filelists:
     print(file)
     print("P:", predictionName, predictionConfidence, pred.argmax())
 
-    cv2.imshow('test',inputs[0])
+    cv2.imshow('test', inputs[0])
     cv2.waitKey()
 
 # import os
@@ -101,13 +100,12 @@ for file in filelists:
 #     elif node.op == 'AssignSub':
 #         node.op = 'Sub'
 #         if 'use_locking' in node.attr: del node.attr['use_locking']
-            
+
 # with graph.as_default():
 # 	tf.import_graph_def(graph_def, name="")
 # 	graph_nodes=[n for n in graph_def.node]#tzg
 
 # print('done1')
-
 
 
 # %matplotlib inline
@@ -126,7 +124,7 @@ for file in filelists:
 #     sourceFolder = "../../../ICNet/my_clothing_parsing/"
 # else:
 #     sourceFolder = "../../../ICNet/wholeperson-256/"
-    
+
 # interFolder = "result/"
 
 # if not os.path.exists(interFolder):
@@ -137,7 +135,7 @@ for file in filelists:
 
 # for file in os.listdir(sourceFolder):
 #     print(file)
-    
+
 #     trainImage1 = cv2.imread(sourceFolder + file)
 #     trainImage1 = cv2.resize(trainImage1, (IMAGE_WIDTH, IMAGE_HEIGHT))
 #     image = trainImage1.copy()
@@ -150,22 +148,21 @@ for file in filelists:
 #     print("three")
 
 
-
 #     answer1 = sess.run(["finalact/activationfinal:0"], feed_dict={"inp:0":np.array(trainImages),
 #                                               "dropout_rate1:0":1.0,
 #                                               "dropout_rate2:0":1.0,
 #                                               "istrain:0":False,})
 
 #     print("five")
-    
+
 #     answer = answer1[0][0]
 #     maxes = np.argmax(answer, axis=1)
 #     oneMask = np.zeros(maxes.shape)
 #     oneMask[np.where(maxes==1)] = 255
 #     oneMask = np.reshape(oneMask, (IMAGE_HEIGHT,IMAGE_WIDTH))
-    
+
 #     mask = oneMask/255.0
-    
+
 #     r = image[:,:,0]
 #     g = image[:,:,1]
 #     b = image[:,:,2]
