@@ -21,6 +21,7 @@ import numpy as np
 import cv2
 import urllib
 import dlib
+import os
 
 print("文件路径:",os.path.dirname(__file__))
 basePath = os.path.dirname(__file__)
