@@ -10,7 +10,7 @@ from ...apps.age import age_service
 from ...apps.gender import gender_service
 from ...apps.nsfw import nsfw_service
 
-logger = Logger('cutcut_service', log2console=False, log2file=True, logfile=config.AGE_LOG_PATH).get_logger()
+logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH).get_logger()
 
 
 def request_kw(text, is_title=True):
