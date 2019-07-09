@@ -79,13 +79,13 @@ def predict(request):
     params = request.GET
     if 'img_url' in params and 'id' in params:
         img, delta_t = common_util.timeit(get_img_from_url, params['img_url'])
-        logger.debug("load img: [url]: {} [elapsed]: {}".format(params['img_url'], delta_t))
+        logger.debug("[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
             logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
         else:
             res = _predict(img)
             res.update({"info": output[res['id']]})
             json_str = json.dumps({"result": res})
-            return HttpResponse(json_str, status=200)
+            return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: 'img_url', 'id'", status=400)

@@ -79,7 +79,7 @@ def get_img_from_url(url):
 
 def _predict(img):
     face_list, delta_t = common_util.timeit(get_face_list, img)
-    logger.debug("dlib face: [elapsed]:{}".format(delta_t))
+    logger.debug("[elapsed-dlib face]:{}".format(delta_t))
     if len(face_list) == 0:
         return None, "no frontal-face detected."
     else:
@@ -117,19 +117,19 @@ def predict(request):
     params = request.GET
     if 'img_url' in params and 'id' in params:
         img, delta_t = common_util.timeit(get_img_from_url, params['img_url'])
-        logger.debug("load img: [url]: {} [elapsed]: {}".format(params['img_url'], delta_t))
+        logger.debug("[elapsed-load img]: {}  [url]: {}".format(params['img_url'], delta_t))
         if img is None:
             json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': 'load image fail'}]})
             logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['img_url']))
         else:
             (res_list, remark) = _predict(img)
-            if (res_list is None):
+            if res_list is None:
                 json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': remark}]})
                 logger.warn("at [id]: {} [res]: {} [remark]: {}".format(params['id'], json_str, remark))
             else:
                 [d.update({"info": output[d['id']]}) for d in res_list]
                 json_str = json.dumps({"result": res_list})
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
-        return HttpResponse(json_str, status=200)
+        return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: 'img_url', 'id'", status=400)
