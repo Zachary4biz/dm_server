@@ -51,5 +51,5 @@ urlpatterns = [
     url(r'age', age_service.predict),
     url(r'gender', gender_service.predict),
     url(r'nsfw', nsfw_service.predict),
-    url(r'cutcut_profile', cutcut_service.profile())
+    url(r'cutcut_profile', cutcut_service.profile)
 ]
