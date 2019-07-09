@@ -22,29 +22,34 @@ from . import basic_view
 from .apps.age import age_service
 from .apps.gender import gender_service
 from .apps.nsfw import nsfw_service
+from .apps.cutcut import cutcut_service
 import json
 
+
 def api_index(request):
-    res = get_all_url(urlpatterns,prev='/')
+    res = get_all_url(urlpatterns, prev='/')
     return HttpResponse(json.dumps(res))
 
-def get_all_url(urlparrentens,prev,is_first=False):
+
+def get_all_url(urlparrentens, prev, is_first=False):
     result = []
     for item in urlparrentens:
-        v = item._regex.strip('^$') #去掉url中的^和$
-        if isinstance(item,RegexURLPattern):
+        v = item._regex.strip('^$')  # 去掉url中的^和$
+        if isinstance(item, RegexURLPattern):
             result.append(prev + v)
         else:
-            get_all_url(item.urlconf_name,prev + v)
+            get_all_url(item.urlconf_name, prev + v)
     return result
+
 
 urlpatterns = [
     url(r'^admin', admin.site.urls),
-	url(r'hello', basic_view.hello),
-	url(r'^$', api_index),
-    url(r'api_index',api_index),
-	url(r'hello_post', basic_view.hello_post),
-	url(r'age', age_service.predict),
-	url(r'gender', gender_service.predict),
-    url(r'nsfw', nsfw_service.predict)
+    url(r'hello', basic_view.hello),
+    url(r'^$', api_index),
+    url(r'api_index', api_index),
+    url(r'hello_post', basic_view.hello_post),
+    url(r'age', age_service.predict),
+    url(r'gender', gender_service.predict),
+    url(r'nsfw', nsfw_service.predict),
+    url(r'cutcut_profile', cutcut_service.profile())
 ]
