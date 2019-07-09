@@ -9,11 +9,13 @@
 
 import logging.handlers
 import sys
+import datetime
 import os
 from os.path import dirname
 
 
-DEFAULT_LOGGING_LEVEL = logging.INFO
+# DEFAULT_LOGGING_LEVEL = logging.INFO
+DEFAULT_LOGGING_LEVEL = logging.DEBUG
 
 
 class Logger(object):
@@ -41,6 +43,7 @@ class Logger(object):
         self.logger.setLevel(logging.INFO)
 
         # set formater
+        logging.Formatter.converter = self.beijing_time
         formatstr = '|%(asctime)s| [%(levelname)s] [%(filename)s-%(lineno)d] %(message)s' if formatstr is None else formatstr
         formatter = logging.Formatter(formatstr, "%Y-%m-%d %H:%M:%S")
 
@@ -62,3 +65,8 @@ class Logger(object):
 
     def get_logger(self):
         return self.logger
+
+    @staticmethod
+    def beijing_time(*args, **kwargs):
+        beijing_time = datetime.datetime.now() + datetime.timedelta(hours=8)
+        return beijing_time.timetuple()
