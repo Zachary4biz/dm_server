@@ -12,18 +12,35 @@ import functools
 
 
 def deco_timeit(func):
+    """
+    @deco_timeit
+    def func(a,b):
+        c = a+b
+        time.sleep(3)
+        return c
+    func(1,3) # (5, 3.004)
+    """
     @functools.wraps(func)
     def wrapper(*args, **kw):
         b = time.time()
         result = func(*args, **kw)
         e = time.time()
         return result, round(e - b, 4)
-
     return wrapper
 
 
 def timeit(func, *args, **kwargs):
+    """
+    def func(a,b):
+        c = a+b
+        time.sleep(3)
+        return c
+    timeit(func,1,3) # (5, 3.004)
+    """
     b = time.time()
     result = func(*args, **kwargs)
     e = time.time()
     return result, round(e - b, 4)
+
+
+
