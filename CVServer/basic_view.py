@@ -19,3 +19,9 @@ def hello_post(request):
 	sec = request.POST['section'] if 'section' in request.POST else ''
 	return render(request, 'basic_view.html', {"param1":"First Param","section":sec})
 
+import json
+def test(request):
+	params = request.GET
+	if 'img_url' in params and 'id' in params:
+		json_str = json.dumps({"img_url":params["img_url"], "id":params["id"]})
+		return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
