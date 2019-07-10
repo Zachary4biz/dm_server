@@ -4,6 +4,7 @@
 # prepare
 ##########
 import json
+import time
 from ...util.logger import Logger
 from ...util import config
 from ...util.common_util import timeit
@@ -74,6 +75,7 @@ param_check_list = ['img_url', 'id']
 
 
 def predict(request):
+    begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = timeit(cvUtil.img_from_url_cv2, params['img_url'])
@@ -94,6 +96,9 @@ def predict(request):
                 [d.update({"info": output[d['id']]}) for d in res_list]
                 json_str = json.dumps({"result": res_list})
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
+        logger.info(
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(params['id'], params['img_url'], json_str,
+                                                                       round(time.time() - begin, 5) * 1000))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)

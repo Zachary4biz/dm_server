@@ -27,6 +27,7 @@ def request_kw(text, is_title=True):
         logger.error(e)
     return keywords
 
+
 def request_nlp(title, content):
     try:
         title_kw = request_kw(title, is_title=True)
@@ -75,8 +76,8 @@ def profile_direct_api(request):
         res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        end = time.time()
-        logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr, round(end-begin, 5)*1000))
+        logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr,
+                                                                               round(time.time() - begin, 5) * 1000))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:

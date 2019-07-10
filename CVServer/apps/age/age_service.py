@@ -4,6 +4,7 @@
 # prepare
 ##########
 import json
+import time
 from ...util.logger import Logger
 from ...util import config
 from ...util import common_util
@@ -83,10 +84,13 @@ _predict(cvUtil.img_from_url_cv2(imgURL))
 #################
 from django.http import HttpResponse
 
+param_check_list = ['img_url', 'id']
+
 
 def predict(request):
+    begin = time.time()
     params = request.GET
-    if 'img_url' in params and 'id' in params:
+    if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
         logger.debug("[elapsed-load img]: {}  [url]: {}".format(params['img_url'], delta_t))
         if img is None:
@@ -101,6 +105,9 @@ def predict(request):
                 [d.update({"info": output[d['id']]}) for d in res_list]
                 json_str = json.dumps({"result": res_list})
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
+        logger.info(
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(params['id'], params['img_url'], json_str,
+                                                                       round(time.time() - begin, 5) * 1000))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse("use GET, param: 'img_url', 'id'", status=400)
+        return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
