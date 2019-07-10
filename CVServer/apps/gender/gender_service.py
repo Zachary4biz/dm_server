@@ -6,7 +6,8 @@
 import json
 from ...util.logger import Logger
 from ...util import config
-from ...util import common_util
+from ...util.common_util import timeit
+from ...util.cv_util import CVUtil
 
 logger = Logger('gender_service', log2console=False, log2file=True, logfile=config.GENDER_LOG_PATH).get_logger()
 
@@ -23,16 +24,9 @@ import dlib
 
 print("文件路径:", os.path.dirname(__file__))
 basePath = os.path.dirname(__file__)
-modelDefInput = basePath + "/model/gender_deploy_correct.prototxt"
-pretrainedModelInput = basePath + "/model/gender_model_correct.caffemodel"
-imgPath = basePath + '/testimg'
-
-mean = np.array([104, 117, 123])
-
-modelClassifier = caffe.Classifier(modelDefInput, pretrainedModelInput,
-                                   image_dims=[256, 256], mean=mean, raw_scale=255.0, channel_swap=(2, 1, 0))
-
-dlib_detector = dlib.get_frontal_face_detector()
+cvUtil = CVUtil()
+modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
+                                    caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
 
 output = [
     'female',
@@ -40,52 +34,28 @@ output = [
 ]
 
 
-def get_face_list(img, enlarge=0.2):
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    rect_list = dlib_detector(gray_img, 1)
-    face_img_list = []
-    for rect in rect_list:
-        (h, w) = (rect.height(), rect.width())
-        (h, w) = (int(h * enlarge), int(w * enlarge))
-        top = rect.top() - h if rect.top() - h > 0 else 0
-        bottom = rect.bottom() + h if rect.bottom() + h < img.shape[0] else img.shape[0]
-        left = rect.left() - h if rect.left() - h > 0 else 0
-        right = rect.right() + h if rect.right() + h < img.shape[1] else img.shape[1]
-        face_img_list.append(img[top:bottom, left:right])
-    return face_img_list
+def get_default_res(info="default res"):
+    return [{'id': -1, 'prob': 1.0, 'info': info}]
 
 
-def pre_process_img(img, img_height=256, img_width=256):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = img / 255.0
-    return [img]
-
-
-def get_img_from_url(url):
-    try:
-        url_response = urllib.urlopen(url)
-        img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
-        img = cv2.imdecode(img_array, -1)
-        return img
-    except Exception, e:
-        print e
-        return None
+# 专用于predict切分人脸后的图像(caffe io下的格式)
+def _predict_face_caffe_img(face):
+    pred = modelClassifier.predict(face)[0]
+    confidence = round(pred[pred.argmax()], 4)
+    return {"id": pred.argmax(), "prob": confidence}
 
 
 def _predict(img):
-    face_list, delta_t = common_util.timeit(get_face_list, img)
+    face_list, delta_t = timeit(cvUtil.get_face_list, img)
     logger.debug("[elapsed-dlib face]:{}".format(delta_t))
+    # face_list = cvUtil.get_face_list(img)
     if len(face_list) == 0:
         return None, "no frontal-face detected."
     else:
-        face_list = [pre_process_img(i) for i in face_list]
+        face_list = [cvUtil.pre_cv2caffe(i) for i in face_list]
         res_list = []
         for face in face_list:
-            predictionsForImage = modelClassifier.predict(face)
-            # pred = predictionsForImage.reshape((len(output)))
-            pred = predictionsForImage[0]
-            confidence = round(pred[pred.argmax()], 4)
-            res_list.append({"id": pred.argmax(), "prob": confidence})
+            res_list.append(_predict_face_caffe_img(face))
         return res_list, "success"
 
 
@@ -93,50 +63,37 @@ def _predict(img):
 # Test case
 #############
 imgURL = "https://upload.wikimedia.org/wikipedia/commons/e/ed/Xi_Jinping_2016.jpg"
-get_img_from_url(imgURL)
-
-# filelists = os.listdir(imgPath)
-filelists = []
-print("filelists", "\n".join(filelists))
-for file in filelists:
-    imgFile = imgPath + '/' + file
-
-    inputs = [caffe.io.load_image(imgFile)]
-
-    predictionsForImage = modelClassifier.predict(inputs)
-    pred = predictionsForImage.reshape((len(output)))
-    predictionName = output[pred.argmax()]
-    predictionConfidence = pred[pred.argmax()]
-
-    print(file)
-    print("P:", predictionName, predictionConfidence, pred.argmax())
-
-# cv2.imshow('test',inputs[0])
-# cv2.waitKey()
+print(_predict(cvUtil.img_from_url_cv2(imgURL)))
 
 #################
 # Django API part
 #################
 from django.http import HttpResponse
 
+param_check_list = ['img_url', 'id']
+
 
 def predict(request):
     params = request.GET
-    if 'img_url' in params and 'id' in params:
-        img, delta_t = common_util.timeit(get_img_from_url, params['img_url'])
+    if all(i in params for i in param_check_list):
+        img, delta_t = timeit(cvUtil.img_from_url_cv2, params['img_url'])
         logger.debug("[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
-            json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': 'load image fail'}]})
+            # 图片加载失败
+            json_str = json.dumps({"result": get_default_res(info="load img fail")})
             logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['img_url']))
         else:
+            # 图片加载完毕
             (res_list, remark) = _predict(img)
             if res_list is None:
-                json_str = json.dumps({"result": [{'id': -1, 'prob': 1.0, 'info': remark}]})
+                # predict失败
+                json_str = json.dumps({"result": get_default_res(info=remark)})
                 logger.warn("at [id]: {} [res]: {} [remark]: {}".format(params['id'], json_str, remark))
             else:
+                # 正常返回
                 [d.update({"info": output[d['id']]}) for d in res_list]
                 json_str = json.dumps({"result": res_list})
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse("use GET, param: 'img_url', 'id'", status=400)
+        return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
