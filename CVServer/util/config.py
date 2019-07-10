@@ -18,6 +18,9 @@ GENDER_LOG_PATH = os.path.join(LOGDIR, "gender_service.log")
 NSFW_LOG_PATH = os.path.join(LOGDIR, "nsfw_service.log")
 CUTCUT_LOG_PATH = os.path.join(LOGDIR, "cutcut_profile.log")
 
-class NLP():
+
+class NLP:
+    def __init__(self):
+        pass
     tag_port = "http://newsprofile-keywords.internalapus.com/segment/tags.jsp"
     kw_port = "http://newsprofile-keywords.internalapus.com/segment/keywords.jsp"
