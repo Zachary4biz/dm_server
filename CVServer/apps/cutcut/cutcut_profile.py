@@ -10,6 +10,7 @@ from ...util.logger import Logger
 from ...apps.age import age_service
 from ...apps.gender import gender_service
 from ...apps.nsfw import nsfw_service
+import time
 
 logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH).get_logger()
 
@@ -50,6 +51,7 @@ param_check_list = ['img_url', 'id', 'title', 'description']
 @csrf_exempt
 def profile_direct_api(request):
     params = request.POST
+    begin = time.time()
     # params-check
     if all(i in params for i in param_check_list):
         img_url = params.get("img_url")
@@ -73,7 +75,8 @@ def profile_direct_api(request):
         res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        logger.info(u"[id]: {} [img_url]: {} [res]: {}".format(id_, img_url, res_jsonstr))
+        end = time.time()
+        logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr, round(end-begin, 5)*1000))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
