@@ -50,8 +50,8 @@ def profile(request):
     if all(i in params for i in param_check_list):
         img_url = params.get("img_url")
         id_ = params.get("id")
-        title = params.get("title")
-        desc = params.get("description")
+        title = params.get("title").encode("utf-8")
+        desc = params.get("description").encode("utf-8")
         logger.debug(" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title, desc))
         # features
         res_dict = {}
