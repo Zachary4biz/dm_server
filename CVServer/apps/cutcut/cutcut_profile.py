@@ -18,8 +18,8 @@ def request_kw(text, is_title=True):
     try:
         res = requests.post(config.NLP.kw_port,
                             data={"sentences": text, "isShortText": "1" if is_title else "0", "topn": 2})
-        if res.status_code == 200:
-            keywords = [i.split(":") for i in res.text.split("\t")]
+        if res.status_code == 200 and len(res.text.strip()) > 0:
+            keywords = [i.split(":") for i in res.text.strip().split("\t")]
             keywords = [{"keyword": kw, "weight": score} for kw, score in keywords]
     except Exception as e:
         logger.error(e)
@@ -40,12 +40,14 @@ from django.http import HttpResponse
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 
+param_check_list = ['img_url', 'id', 'title', 'description']
+
 
 @csrf_exempt
 def profile(request):
-    if request.method == "POST":
-        # params-check
-        params = request.POST
+    params = request.POST
+    # params-check
+    if all(i in params for i in param_check_list):
         img_url = params.get("img_url")
         id_ = params.get("id")
         title = params.get("title")
@@ -67,8 +69,8 @@ def profile(request):
         res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        logger.info(res_jsonstr)
+        logger.info("[id]: {} [img_url]: {} [res]: {}".format(id_, img_url, res_jsonstr))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
-        return HttpResponse("use POST, param: 'title', 'description','img_ur','id'", status=400)
+        return HttpResponse("use POST(form), params: '{}'".format(",".join(param_check_list)), status=400)
