@@ -54,9 +54,9 @@ def profile_direct_api(request):
     if all(i in params for i in param_check_list):
         img_url = params.get("img_url")
         id_ = params.get("id")
-        title = params.get("title").encode("utf-8")
-        desc = params.get("description").encode("utf-8")
-        logger.debug(" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title, desc))
+        title = params.get("title")
+        desc = params.get("description")
+        logger.debug(u" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title[:50], desc[:50]))
         # features
         res_dict = {}
         # CV features
@@ -73,7 +73,7 @@ def profile_direct_api(request):
         res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        logger.info("[id]: {} [img_url]: {} [res]: {}".format(id_, img_url, res_jsonstr))
+        logger.info(u"[id]: {} [img_url]: {} [res]: {}".format(id_, img_url, res_jsonstr))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:

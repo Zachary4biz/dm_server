@@ -40,7 +40,7 @@ class Logger(object):
 
         # create logger
         self.logger = logging.getLogger(loggername)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
         # set formater
         logging.Formatter.converter = self.beijing_time
