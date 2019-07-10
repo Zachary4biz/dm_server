@@ -1,3 +1,4 @@
+# encoding:utf-8
 # author: zac
 # create-time: 2019-07-09 15:31
 # usage: - 
@@ -25,11 +26,14 @@ def request_kw(text, is_title=True):
         logger.error(e)
     return keywords
 
-
 def request_nlp(title, content):
-    title_kw = request_kw(title, is_title=True)
-    content_kw = request_kw(content, is_title=False)
-    nlp_res = {"title_keywords": title_kw, "content_keywords": content_kw}
+    try:
+        title_kw = request_kw(title, is_title=True)
+        content_kw = request_kw(content, is_title=False)
+        nlp_res = {"title_keywords": title_kw, "content_keywords": content_kw}
+    except Exception as e:
+        logger.error(repr(e))
+        nlp_res = {"title_keywords": [], "content_keywords": []}
     return nlp_res
 
 
@@ -44,7 +48,7 @@ param_check_list = ['img_url', 'id', 'title', 'description']
 
 
 @csrf_exempt
-def profile(request):
+def profile_direct_api(request):
     params = request.POST
     # params-check
     if all(i in params for i in param_check_list):
@@ -74,3 +78,21 @@ def profile(request):
 
     else:
         return HttpResponse("use POST(form), params: '{}'".format(",".join(param_check_list)), status=400)
+
+
+def default_profile(request):
+    res = {
+        "age": age_service.get_default_res(info=""),
+        "gender": gender_service.get_default_res(info=""),
+        "nsfw": nsfw_service.get_default_res(info=""),
+        "title_keywords": [],
+        "content_keywords": []
+    }
+    json_str = json.dumps(res)
+    return HttpResponse(json_str, status=200)
+
+
+# todo 内部by code调用各个service
+@csrf_exempt
+def profile(request):
+    pass
