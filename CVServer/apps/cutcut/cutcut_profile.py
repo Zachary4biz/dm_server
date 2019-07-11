@@ -67,13 +67,14 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
+        nsfw_res = json.loads(nsfw_service.predict(inner_request).content)["result"]
+        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         age_res = json.loads(age_service.predict(inner_request).content)["result"]
         gender_res = json.loads(gender_service.predict(inner_request).content)["result"]
-        nsfw_res = json.loads(nsfw_service.predict(inner_request).content)["result"]
         # NLP features
         nlp_res_dict = request_nlp(title, desc)
         # return
-        res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res})
+        res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res, "is_nsfw": is_nsfw})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr,
@@ -89,6 +90,7 @@ def default_profile(request):
         "age": age_service.get_default_res(info=""),
         "gender": gender_service.get_default_res(info=""),
         "nsfw": nsfw_service.get_default_res(info=""),
+        "is_nsfw": 0,
         "title_keywords": [],
         "content_keywords": []
     }
