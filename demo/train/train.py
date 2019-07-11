@@ -329,11 +329,14 @@ inputs = tf.placeholder("float32", [None, IMG_HEIGHT, IMG_WIDTH, 3], name="input
 inptrue = tf.placeholder("float32", [None, numPointsX2], name="inptrue")
 global_step = tf.placeholder("int32", name="global_step")
 
-logits, pred = mobilenet_v2.mobilenetv2_caffe(inputs, numPointsX2)
+# logits, pred = mobilenet_v2.mobilenetv2_caffe(inputs, numPointsX2)
+logits, pred = mobilenet_v2.mobilenetv2_caffe(inputs, 4)
+[0.134,0.34426,0.77456,0.23523], 0.78
 
-landmarks = tf.reshape(inptrue, (-1, numPoints, 2))
-logits2 = tf.reshape(logits, (-1, numPoints, 2))
-loss = wing_loss(landmarks, logits2)
+# landmarks = tf.reshape(inptrue, (-1, numPoints, 2))
+# logits2 = tf.reshape(logits, (-1, numPoints, 2))
+# loss = wing_loss(landmarks, logits2)
+// CE(inptrue,logits)
 
 learningRate = tf.train.inverse_time_decay(initialLearningRate, global_step, 1, learningRateDecay, name="ratedecay")
 optimizer = tf.train.AdamOptimizer(learningRate, name="adamfull")

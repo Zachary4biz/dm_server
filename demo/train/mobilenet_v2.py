@@ -38,7 +38,7 @@ from ops import *
 #         pred = tf.nn.softmax(logits, name='prob')
 #         return logits, pred
 
-
+# original
 def mobilenetv2(inputs, num_classes, is_train=True, reuse=False):
     exp = 6  # expansion ratio
     with tf.variable_scope('mobilenetv2'):
@@ -75,7 +75,7 @@ def mobilenetv2(inputs, num_classes, is_train=True, reuse=False):
         pred = tf.nn.softmax(logits, name='prob')
         return logits, pred
     
-    
+# clip
 def mobilenetv2_caffe(inputs, num_classes, is_train=True, reuse=False):
     exp = 6  # expansion ratio
     with tf.variable_scope('mobilenetv2'):
