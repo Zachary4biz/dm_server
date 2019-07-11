@@ -74,7 +74,7 @@ def profile_direct_api(request):
         # NLP features
         nlp_res_dict = request_nlp(title, desc)
         # return
-        res_dict.update({"age": age_res, "gender": gender_res, "nsfw_res": nsfw_res, "is_nsfw": is_nsfw})
+        res_dict.update({"age": age_res, "gender": gender_res, "nsfw": nsfw_res, "is_nsfw": is_nsfw})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr,
