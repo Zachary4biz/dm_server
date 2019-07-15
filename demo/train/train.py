@@ -336,7 +336,7 @@ logits, pred = mobilenet_v2.mobilenetv2_caffe(inputs, 4)
 # landmarks = tf.reshape(inptrue, (-1, numPoints, 2))
 # logits2 = tf.reshape(logits, (-1, numPoints, 2))
 # loss = wing_loss(landmarks, logits2)
-// CE(inptrue,logits)
+loss=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=inptrue,logits=logits),name='loss')
 
 learningRate = tf.train.inverse_time_decay(initialLearningRate, global_step, 1, learningRateDecay, name="ratedecay")
 optimizer = tf.train.AdamOptimizer(learningRate, name="adamfull")
