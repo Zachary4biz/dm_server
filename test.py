@@ -27,3 +27,15 @@ for id_, url in img_list:
     res = requests.get("http://10.65.32.218:8000/nsfw?img_url={}&id={}".format(url, id_)).text
     e = time.time()
     print("  鉴黄 of {}: [res]:{} [time]:{}".format(id_, res, str(e - b)))
+
+profile_request_json = {
+    'img_url': 'http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg',
+    'id': -1,
+    'title': 'FM明星大片',
+    'description': 'Rihanna以唐朝风发髻和妆容登上中国版BAZAAR 8月上封面，日日不愧是“山东人，扮起唐装一点也不违和😁'
+}
+b = time.time()
+res = requests.post(url="http://10.65.32.218:8000/cutcut_profile", json=profile_request_json).text
+e = time.time()
+print("\ncutcut_profile: [time]:{}".format(str(e - b)))
+print("\n"+res+'\n')
