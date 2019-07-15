@@ -1,6 +1,7 @@
 # encoding:utf-8
 import requests
 import time
+
 xjp = ["xjp", "https://upload.wikimedia.org/wikipedia/commons/e/ed/Xi_Jinping_2016.jpg"]
 emma = ["emma", "http://n.sinaimg.cn/front/241/w552h489/20190204/vYlJ-hsmkfyp5208900.jpg"]
 nsfw1 = ["nsfw1",
@@ -17,11 +18,11 @@ for id_, url in img_list:
     b = time.time()
     res = requests.get("http://10.65.32.218:8000/age?img_url={}&id={}".format(url, id_)).text
     e = time.time()
-    print("  年龄 of {}: [res]:{} [time]:{}".format(id_, res, str(e-b)))
+    print("  年龄 of {}: [res]:{} [time]:{}".format(id_, res, str(e - b)))
     b = time.time()
     res = requests.get("http://10.65.32.218:8000/gender?img_url={}&id={}".format(url, id_)).text
     e = time.time()
-    print("  性别 of {}: [res]:{} [time]:{}".format(id_, res, str(e-b)))
+    print("  性别 of {}: [res]:{} [time]:{}".format(id_, res, str(e - b)))
     b = time.time()
     res = requests.get("http://10.65.32.218:8000/nsfw?img_url={}&id={}".format(url, id_)).text
     e = time.time()
