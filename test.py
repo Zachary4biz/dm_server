@@ -13,6 +13,9 @@ img_list = [xjp, emma, nsfw1, nsfw2]
 print(">>>所有API接口:")
 print(requests.get("http://10.65.32.218:8000/api_index").text)
 
+print(">>>默认profile: ")
+print(requests.get("http://10.65.32.218:8000/cutcut_default_profile").text)
+
 for id_, url in img_list:
     print(">>>{}".format(id_))
     b = time.time()
