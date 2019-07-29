@@ -16,19 +16,20 @@ logger = Logger('age_service', log2console=False, log2file=True, logfile=config.
 # cv part
 #########
 import sys
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import numpy as np
 import cv2
 import urllib
 import dlib
-import os
 
 print("文件路径:", os.path.dirname(__file__))
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
                                     caffemodel_fp=basePath + "/model/full_age.caffemodel")
-TIMEOUT = 3
+TIMEOUT = 5
 output = [
     '71+ years',
     '36 - 50 years',

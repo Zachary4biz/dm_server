@@ -16,6 +16,8 @@ logger = Logger('gender_service', log2console=False, log2file=True, logfile=conf
 # cv part
 #########
 import sys
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import numpy as np
 import os
@@ -29,7 +31,7 @@ cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
                                     caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
 
-TIMEOUT = 3
+TIMEOUT = 4
 output = [
     'female',
     'male',

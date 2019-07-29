@@ -12,6 +12,7 @@ from ...apps.age import age_service
 from ...apps.gender import gender_service
 from ...apps.nsfw import nsfw_service
 import time
+import timeout_decorator
 
 logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH).get_logger()
 
@@ -53,20 +54,44 @@ from django.views.decorators.csrf import csrf_exempt
 param_check_list = ['img_url', 'id', 'title', 'description']
 
 
-@common_util.deco_timeit
+# todo 当前此方法不生效
 def request_service(service, inner_request):
-    res = []
+    default = service.get_default_res()
+    msg = "timeout at {} in {} sec".format(service.__name__, service.TIMEOUT)
+    @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
+    def request(inner_request_):
+        res_ = json.loads(nsfw_service.predict(inner_request_).content)['result']
+        return res_
+    b = time.time()
+    try:
+        res = request(inner_request)
+    except Exception as e:
+        logger.error(e)
+        res = default
+    delta = str(round(time.time() - b, 5) * 1000) + 'ms'
+    return res, delta
 
-    def timeout_func():
-        res.append(json.loads(service.predict(inner_request).content))
-
-    p = multiprocessing.Process(target=timeout_func)
-    p.start()
-    p.join(service.TIMEOUT)
-    if p.is_alive():
-        p.terminate()
-        p.join()
-    return res[0]
+# @timeout_decorator.timeout(3)
+# def get_nsfw(inner_request):
+#     b = time.time()
+#     res = json.loads(nsfw_service.predict(inner_request).content)['result']
+#     delta = str(round(time.time() - b, 5) * 1000) + 'ms'
+#     return res, delta
+#
+# @timeout_decorator.timeout(3)
+# def get_age(inner_request):
+#     b = time.time()
+#     res = json.loads(age_service.predict(inner_request).content)['result']
+#     delta = str(round(time.time() - b, 5) * 1000) + 'ms'
+#     return res, delta
+#
+#
+# @timeout_decorator.timeout(5)
+# def get_gender(inner_request):
+#     b = time.time()
+#     res = json.loads(gender_service.predict(inner_request).content)['result']
+#     delta = str(round(time.time() - b, 5) * 1000) + 'ms'
+#     return res, delta
 
 
 @csrf_exempt
@@ -88,9 +113,9 @@ def profile_direct_api(request):
         inner_request.GET = {"img_url": img_url, "id": id_}
 
         nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
-        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         age_res, age_time = request_service(age_service, inner_request)
         gender_res, gender_time = request_service(gender_service, inner_request)
+        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         # NLP features
         nlp_res_dict = request_nlp(title, desc)
         # return
@@ -132,3 +157,5 @@ def default_profile(request):
 @csrf_exempt
 def profile(request):
     pass
+
+

@@ -14,8 +14,8 @@ import os
 from os.path import dirname
 
 
-# DEFAULT_LOGGING_LEVEL = logging.INFO
-DEFAULT_LOGGING_LEVEL = logging.DEBUG
+DEFAULT_LOGGING_LEVEL = logging.INFO
+#DEFAULT_LOGGING_LEVEL = logging.DEBUG
 
 
 class Logger(object):
