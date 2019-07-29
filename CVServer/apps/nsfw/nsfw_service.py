@@ -84,8 +84,8 @@ def predict(request):
                 res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
         logger.info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(params['id'], params['img_url'], json_str,
-                                                                       round(time.time() - begin, 5) * 1000))
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms [elapsed-load img]: {}ms".format(params['id'], params['img_url'], json_str,
+                                                                       round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)

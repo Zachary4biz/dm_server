@@ -78,8 +78,8 @@ def _predict(img):
 # 夸张表情失败：
 #	https://s9.rr.itc.cn/r/Q/Iv/IzaIf6j.jpg
 
-imgURL = "https://upload.wikimedia.org/wikipedia/commons/e/ed/Xi_Jinping_2016.jpg"
-_predict(cvUtil.img_from_url_cv2(imgURL))
+# imgURL = "https://upload.wikimedia.org/wikipedia/commons/e/ed/Xi_Jinping_2016.jpg"
+# _predict(cvUtil.img_from_url_cv2(imgURL))
 
 #################
 # Django API part
@@ -108,8 +108,8 @@ def predict(request):
                 json_str = json.dumps({"result": res_list})
                 logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
         logger.info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(params['id'], params['img_url'], json_str,
-                                                                       round(time.time() - begin, 5) * 1000))
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed-total]: {}ms [elapsed-load img]: {}ms".format(params['id'], params['img_url'], json_str,
+                                                                       round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
