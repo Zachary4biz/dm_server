@@ -4,6 +4,8 @@
 import urllib
 import numpy as np
 import cv2
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import dlib
 
