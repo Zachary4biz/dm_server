@@ -57,10 +57,10 @@ param_check_list = ['img_url', 'id', 'title', 'description']
 # todo 当前此方法不生效
 def request_service(service, inner_request):
     default = service.get_default_res()
-    msg = "timeout at {} in {} sec".format(service.__name__, service.TIMEOUT)
+    msg = "timeout at {} in {} sec".format(str(service.NAME), service.TIMEOUT)
     @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
     def request(inner_request_):
-        res_ = json.loads(nsfw_service.predict(inner_request_).content)['result']
+        res_ = json.loads(service.predict(inner_request_).content)['result']
         return res_
     b = time.time()
     try:
