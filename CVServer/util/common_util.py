@@ -22,10 +22,10 @@ def deco_timeit(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        b = time.time()
+        t0 = time.time()
         result = func(*args, **kw)
-        e = time.time()
-        return result, round(e - b, 4)
+        delta = str(round(time.time() - t0, 5) * 1000)+"ms"
+        return result, delta
     return wrapper
 
 

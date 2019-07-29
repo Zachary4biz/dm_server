@@ -5,7 +5,8 @@
 
 import json
 import requests
-from ...util import config
+import multiprocessing
+from ...util import config, common_util
 from ...util.logger import Logger
 from ...apps.age import age_service
 from ...apps.gender import gender_service
@@ -29,12 +30,15 @@ def request_kw(text, is_title=True):
 
 
 def request_nlp(title, content):
-    try:
-        title_kw = request_kw(title, is_title=True)
-        content_kw = request_kw(content, is_title=False)
-        nlp_res = {"title_keywords": title_kw, "content_keywords": content_kw}
-    except Exception as e:
-        logger.error(repr(e))
+    if title or content:
+        try:
+            title_kw = request_kw(title, is_title=True)
+            content_kw = request_kw(content, is_title=False)
+            nlp_res = {"title_keywords": title_kw, "content_keywords": content_kw}
+        except Exception as e:
+            logger.error(repr(e))
+            nlp_res = {"title_keywords": [], "content_keywords": []}
+    else:
         nlp_res = {"title_keywords": [], "content_keywords": []}
     return nlp_res
 
@@ -47,6 +51,22 @@ from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 
 param_check_list = ['img_url', 'id', 'title', 'description']
+
+
+@common_util.deco_timeit
+def request_service(service, inner_request):
+    res = []
+
+    def timeout_func():
+        res.append(json.loads(service.predict(inner_request).content))
+
+    p = multiprocessing.Process(target=timeout_func)
+    p.start()
+    p.join(service.TIMEOUT)
+    if p.is_alive():
+        p.terminate()
+        p.join()
+    return res[0]
 
 
 @csrf_exempt
@@ -67,18 +87,26 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
-        nsfw_res = json.loads(nsfw_service.predict(inner_request).content)["result"]
+        nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
-        age_res = json.loads(age_service.predict(inner_request).content)["result"]
-        gender_res = json.loads(gender_service.predict(inner_request).content)["result"]
+        age_res, age_time = request_service(age_service, inner_request)
+        gender_res, gender_time = request_service(gender_service, inner_request)
         # NLP features
         nlp_res_dict = request_nlp(title, desc)
         # return
-        res_dict.update({"age": age_res, "gender": gender_res, "ethnic": [], "nsfw": nsfw_res, "review_status": [is_nsfw], "status":"success"})
+        res_dict.update(
+            {"age": age_res, "gender": gender_res, "ethnic": [], "nsfw": nsfw_res, "review_status": [is_nsfw],
+             "status": "success"})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        logger.info(u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms".format(id_, img_url, res_jsonstr,
-                                                                               round(time.time() - begin, 5) * 1000))
+        total_time = str(round(time.time() - begin, 5) * 1000) + "ms"
+        logger.info(
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} ".format(id_, img_url,
+                                                                                                           res_jsonstr,
+                                                                                                           total_time,
+                                                                                                           nsfw_time,
+                                                                                                           age_time,
+                                                                                                           gender_time))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
@@ -94,7 +122,7 @@ def default_profile(request):
         "review_status": [0],
         "title_keywords": [],
         "content_keywords": [],
-        "status":"fail"
+        "status": "fail"
     }
     json_str = json.dumps(res)
     return HttpResponse(json_str, status=200)
