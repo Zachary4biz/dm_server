@@ -17,7 +17,6 @@ logger = Logger('age_service', log2console=False, log2file=True, logfile=config.
 #########
 import sys
 import os
-
 os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import numpy as np
