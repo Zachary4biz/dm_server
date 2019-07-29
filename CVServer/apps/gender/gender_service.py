@@ -32,6 +32,7 @@ modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy
                                     caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
 
 TIMEOUT = 4
+NAME = "gender_service"
 output = [
     'female',
     'male',

@@ -17,6 +17,7 @@ logger = Logger('age_service', log2console=False, log2file=True, logfile=config.
 #########
 import sys
 import os
+
 os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import numpy as np
@@ -30,6 +31,7 @@ cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
                                     caffemodel_fp=basePath + "/model/full_age.caffemodel")
 TIMEOUT = 5
+NAME = "age_service"
 output = [
     '71+ years',
     '36 - 50 years',

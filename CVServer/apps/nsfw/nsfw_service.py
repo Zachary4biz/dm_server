@@ -31,6 +31,7 @@ modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.p
                                     caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
 
 TIMEOUT = 5
+NAME = "nsfw_service"
 output = [
     'normal pic',
     'nsfw pic'
