@@ -5,10 +5,10 @@ Class definition of YOLO_v3 style detection model on image and video
 
 import colorsys
 import sys
-sys.path.append("/Users/zac/server/CVServer/")
+# sys.path.append("/Users/zac/server/CVServer/")
 # import os
 from timeit import default_timer as timer
-from util.cv_util import CVUtil
+from ...util.cv_util import CVUtil
 import numpy as np
 from keras import backend as K
 from keras.models import load_model
