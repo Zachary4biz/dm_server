@@ -99,7 +99,7 @@ def profile_direct_api(request):
         nlp_res_dict = request_nlp(title, desc)
         # return
         res_dict.update(
-            {"age": age_res, "gender": gender_res, "obj" : yolo_res, "ethnic": [], "nsfw": nsfw_res, "review_status": [is_nsfw],
+            {"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res, "review_status": [is_nsfw],
              "status": "success"})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
