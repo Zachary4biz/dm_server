@@ -24,8 +24,9 @@ import cv2
 import urllib
 from PIL import Image
 from yolo import YOLO
+from keras import backend as K
 
-print("文件路径:", os.path.dirname(__file__))
+
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 params = YOLO._defaults.copy()
@@ -40,6 +41,7 @@ def _predict(img):
     try:
         res = []
         objs_found = yolo.detect_image_noshow(img)
+        K.clear_session()
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
         return res, "success"
