@@ -27,9 +27,9 @@ import cv2
 class YOLO(object):
     _defaults = {
         # "model_path": 'logs/face_detector-ep076-loss7.6752-val_loss7.7060.h5',
-        "model_path": 'model/yolo.h5',
-        "anchors_path": 'model/original_anchors.txt',
-        "classes_path": 'model/original_classes.txt',
+        "model_path": os.path.dirname(__file__)+'/model/yolo.h5',
+        "anchors_path": os.path.dirname(__file__)+'/model/original_anchors.txt',
+        "classes_path": os.path.dirname(__file__)+'/model/original_classes.txt',
         "score": 0.3,
         "iou": 0.45,
         "model_image_size": (416, 416),
