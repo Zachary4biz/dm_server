@@ -22,7 +22,7 @@ from keras.utils import multi_gpu_model
 import itertools
 import json
 import cv2
-
+import tensorflow as tf
 
 class YOLO(object):
     _defaults = {
@@ -48,7 +48,8 @@ class YOLO(object):
         self.__dict__.update(kwargs)  # and update with user overrides
         self.class_names = self._get_class()
         self.anchors = self._get_anchors()
-        self.sess = K.get_session()
+        self.graph = tf.Graph()
+        self.sess = K.set_session(tf.Session(graph=self.graph))
         self.boxes, self.scores, self.classes = self.generate()
 
     def _get_class(self):
