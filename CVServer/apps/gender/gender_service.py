@@ -25,7 +25,6 @@ import cv2
 import urllib
 import dlib
 
-print("文件路径:", os.path.dirname(__file__))
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
