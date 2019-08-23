@@ -32,8 +32,8 @@ params = YOLO._defaults.copy()
 params.update({"image": True})
 yolo = YOLO(**params)
 
-TIMEOUT = 5
-NAME = "nsfw_service"
+TIMEOUT = 8
+NAME = "yolo_service"
 
 
 def _predict(img):
