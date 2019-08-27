@@ -40,8 +40,8 @@ NAME = "yolo_service"
 def _predict(img):
     try:
         res = []
-        objs_found = yolo.detect_image_noshow(img)
-        K.clear_session()
+        with yolo.graph.as_default():
+            objs_found = yolo.detect_image_noshow(img)
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
         return res, "success"
@@ -74,7 +74,7 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_PIL, params['img_url'])
-        logger.debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
+        logger.info(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
             logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
