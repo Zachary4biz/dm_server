@@ -27,6 +27,7 @@ import json
 import cv2
 import tensorflow as tf
 import urllib
+from io import BytesIO
 
 class YOLO(object):
     _defaults = {
@@ -278,9 +279,8 @@ def detect_img_from_url(yolo,default_url=None):
         url = input('Input image url(输入带引号):' )
         try:
             # parse img
-            image = img_from_url_cv2(url)  # 402,600,3
-            image = cv2.cvtColor(cv2.resize(image, (416, 416)), cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(image)
+            url_response = urllib.urlopen(url)
+            image = Image.open(BytesIO(url_response.read()))
             print(image.width, image.height)
         except:
             print('Open Error! Try again!')
@@ -303,4 +303,5 @@ params.update({"image": True})
 yolo = YOLO(**params)
 
 img_url = "https://static.xprodev.com/imageView2/material/872d563e/201908/271519/2267895358_1566890382533.jpg?mode=0&w=300&h=300"
+"http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
 detect_img_from_url(yolo)
