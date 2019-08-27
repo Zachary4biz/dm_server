@@ -197,13 +197,14 @@ class YOLO(object):
         print("gonna execute sess.run ...")
         print("input_image_shape:", [image.size[1], image.size[0]])
         print(tf.get_default_graph() == self.graph, self.sess.graph == self.graph)
-        out_boxes, out_scores, out_classes = self.sess.run(
-            [self.boxes, self.scores, self.classes],
-            feed_dict={
-                self.yolo_model.input: image_data,
-                self.input_image_shape: [image.size[1], image.size[0]],
-                K.learning_phase(): 0
-            })
+        with self.graph.as_default():
+            out_boxes, out_scores, out_classes = self.sess.run(
+                [self.boxes, self.scores, self.classes],
+                feed_dict={
+                    self.yolo_model.input: image_data,
+                    self.input_image_shape: [image.size[1], image.size[0]],
+                    K.learning_phase(): 0
+                })
         print("finished sess.run ...")
         return [self.class_names[i] for i in out_classes]
 

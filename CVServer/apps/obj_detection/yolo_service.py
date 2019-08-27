@@ -41,8 +41,7 @@ def _predict(img):
     try:
         res = []
         logger.info("do detect")
-        with yolo.graph.as_default():
-            objs_found = yolo.detect_image_noshow(img)
+        objs_found = yolo.detect_image_noshow(img)
         logger.info("detect done")
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
