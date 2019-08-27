@@ -7,8 +7,12 @@ import cv2
 import os
 os.environ['GLOG_minloglevel'] = '2'
 from PIL import Image
-import caffe
+from io import BytesIO
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+import os as caffe
 import dlib
+
 
 
 class CVUtil():
@@ -31,23 +35,26 @@ class CVUtil():
             img = cv2.imdecode(img_array, -1)
             return img
         except Exception, e:
-            print e
+            print "load img from url failed: "+str(e)
             return None
 
     @staticmethod
-    def img_from_url_PIL(url, img_size=(416,416)):
-        image = CVUtil.img_from_url_cv2(url)  # 402,600,3
-        image = cv2.cvtColor(cv2.resize(image, img_size), cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image)
-        return image
+    def img_from_url_PIL(url):
+        try:
+            url_response = urllib.urlopen(url)
+            image = Image.open(BytesIO(url_response.read()))
+            return image
+        except Exception, e:
+            print "load img from url failed: "+str(e)
+            return None
 
     @staticmethod
     def img_from_fp_caffe(file_path):
         return [caffe.io.load_image(file_path)]
 
     @staticmethod
-    def pre_cv2caffe(img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    def pre_cv2caffe(img_inp):
+        img = cv2.cvtColor(img_inp, cv2.COLOR_BGR2RGB)
         img = img / 255.0
         return [img]
 

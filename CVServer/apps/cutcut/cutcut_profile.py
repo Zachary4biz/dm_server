@@ -8,9 +8,9 @@ import requests
 import multiprocessing
 from ...util import config, common_util
 from ...util.logger import Logger
-from ...apps.age import age_service
-from ...apps.gender import gender_service
-from ...apps.nsfw import nsfw_service
+# from ...apps.age import age_service
+# from ...apps.gender import gender_service
+# from ...apps.nsfw import nsfw_service
 from ...apps.obj_detection import yolo_service
 import time
 import timeout_decorator
@@ -60,10 +60,15 @@ def request_service(service, inner_request):
     msg = "timeout at {} in {} sec".format(str(service.NAME), service.TIMEOUT)
     @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
     def request(inner_request_):
-        res_ = json.loads(service.predict(inner_request_).content)['result']
+        logger.info("begin predict ..")
+        ress = service.predict(inner_request_)
+        logger.info("predict end")
+        ress = ress.content
+        res_ = json.loads(ress)['result']
         return res_
     b = time.time()
     try:
+        logger.info("begin request by {}".format(service.NAME))
         res = request(inner_request)
     except Exception as e:
         logger.error(e)
@@ -90,27 +95,27 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
-        nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
-        age_res, age_time = request_service(age_service, inner_request)
-        gender_res, gender_time = request_service(gender_service, inner_request)
+        # nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
+        # age_res, age_time = request_service(age_service, inner_request)
+        # gender_res, gender_time = request_service(gender_service, inner_request)
         yolo_res, yolo_time = request_service(yolo_service, inner_request)
-        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
+        # is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         # NLP features
-        nlp_res_dict = request_nlp(title, desc)
+        # nlp_res_dict = request_nlp(title, desc)
         # return
         res_dict.update(
-            {"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res, "review_status": [is_nsfw],
+            {"age": [], "gender": [], "obj": yolo_res, "ethnic": [], "nsfw": [], "review_status": [],
              "status": "success"})
-        res_dict.update(nlp_res_dict)
+        # res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         total_time = str(round(time.time() - begin, 5) * 1000) + "ms"
         logger.info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} ".format(id_, img_url,
                                                                                                            res_jsonstr,
                                                                                                            total_time,
-                                                                                                           nsfw_time,
-                                                                                                           age_time,
-                                                                                                           gender_time))
+                                                                                                           0,
+                                                                                                           0,
+                                                                                                           0))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:

@@ -52,6 +52,7 @@ class YOLO(object):
         with self.graph.as_default():
             self.boxes, self.scores, self.classes = self.generate()
             self.sess = K.get_session()
+            self.graph.finalize()
 
     def _get_class(self):
         classes_path = os.path.expanduser(self.classes_path)
@@ -192,6 +193,10 @@ class YOLO(object):
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
+        print("add batch dim:", image_data.shape)
+        print("gonna execute sess.run ...")
+        print("input_image_shape:", [image.size[1], image.size[0]])
+        print(tf.get_default_graph() == self.graph, self.sess.graph == self.graph)
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
@@ -199,6 +204,7 @@ class YOLO(object):
                 self.input_image_shape: [image.size[1], image.size[0]],
                 K.learning_phase(): 0
             })
+        print("finished sess.run ...")
         return [self.class_names[i] for i in out_classes]
 
     def close_session(self):
