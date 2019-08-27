@@ -15,14 +15,8 @@ logger = Logger('age_service', log2console=False, log2file=True, logfile=config.
 #########
 # cv part
 #########
-import sys
 import os
 os.environ['GLOG_minloglevel'] = '2'
-import caffe
-import numpy as np
-import cv2
-import urllib
-import dlib
 
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
