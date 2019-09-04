@@ -17,7 +17,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls.resolvers import RegexURLPattern
+# from django.urls.resolvers import RegexURLPattern
 from django.views.decorators.csrf import csrf_exempt
 from . import basic_view
 # from .apps.age import age_service
@@ -27,28 +27,28 @@ from .apps.obj_detection import yolo_service
 from .apps.cutcut import cutcut_profile
 import json
 
+# django2 没有RegexURLPattern这个类了，暂时没解决，取消获取所有url的接口
+# def api_index(request):
+#     res = get_all_url(urlpatterns, prev='/')
+#     return HttpResponse(json.dumps(res))
 
-def api_index(request):
-    res = get_all_url(urlpatterns, prev='/')
-    return HttpResponse(json.dumps(res))
 
-
-def get_all_url(urlparrentens, prev, is_first=False):
-    result = []
-    for item in urlparrentens:
-        v = item._regex.strip('^$')  # 去掉url中的^和$
-        if isinstance(item, RegexURLPattern):
-            result.append(prev + v)
-        else:
-            get_all_url(item.urlconf_name, prev + v)
-    return result
+# def get_all_url(urlparrentens, prev, is_first=False):
+#     result = []
+#     for item in urlparrentens:
+#         v = item._regex.strip('^$')  # 去掉url中的^和$
+#         if isinstance(item, RegexURLPattern):
+#             result.append(prev + v)
+#         else:
+#             get_all_url(item.urlconf_name, prev + v)
+#     return result
 
 
 urlpatterns = [
     url(r'^admin', admin.site.urls),
     url(r'hello', basic_view.hello),
-    url(r'^$', api_index),
-    url(r'api_index', api_index),
+    # url(r'^$', api_index),
+    # url(r'api_index', api_index),
     url(r'hello_post', basic_view.hello_post),
     # url(r'age', age_service.predict),
     # url(r'gender', gender_service.predict),
