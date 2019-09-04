@@ -1,8 +1,4 @@
 # encoding=utf-8
-# 直接返回文字的Response
-import os
-import sys
-import urls
 
 from django.http import HttpResponse
 
