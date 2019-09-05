@@ -40,7 +40,7 @@ def get_default_res(info="default res"):
 def _predict_face_caffe_img(face):
     pred = modelClassifier.predict(face)[0]
     confidence = round(pred[pred.argmax()], 4)
-    return {"id": pred.argmax(), "prob": confidence}
+    return {"id": int(pred.argmax()), "prob": confidence}
 
 
 def _predict(img):

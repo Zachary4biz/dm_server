@@ -40,7 +40,7 @@ def _predict(img):
         img_pro = cvUtil.pre_cv2caffe(img)
         pred = modelClassifier.predict(img_pro)[0]
         confidence = round(pred[pred.argmax()], 4)
-        return {"id": pred.argmax(), "prob": confidence}, "success"
+        return {"id": int(pred.argmax()), "prob": confidence}, "success"
     except Exception as e:
         logger.error(e)
         return None, repr(e.message)
