@@ -12,13 +12,17 @@ else
 fi
 
 dt=`date +%Y-%m-%d_%H:%M:%S`
-logfile="./CVServer/logs/localhost_access_log.log"
+logDir="./CVServer/logs"
+if [[ ! -d ${logDir} ]]; then
+    echo "没有log目录，直接新建"
+    mkdir ./CVServer/logs
+fi
+
+logfile="${logDir}/localhost_access_log.log"
 if [[ -f ${logfile} ]]; then
     echo "上次的日志文件cp加上日期时间后缀（精确到秒）"
     \cp ${logfile} ${logfile}.${dt}
-else
-    echo "没有历史日志文件，直接新建"
-    mkdir ./CVServer/logs
 fi
-nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ${logfile} &
+
+nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ${logfile}  2>&1 &
 
