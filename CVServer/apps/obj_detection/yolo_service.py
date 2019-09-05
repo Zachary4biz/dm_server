@@ -15,25 +15,18 @@ logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config
 #########
 # cv part
 #########
-import sys
 import os
-
 os.environ['GLOG_minloglevel'] = '2'
-import numpy as np
-import cv2
-import urllib
-from PIL import Image
-from yolo import YOLO
-from keras import backend as K
+from .yolo import YOLOModel
 
 
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
-params = YOLO._defaults.copy()
+params = YOLOModel._defaults.copy()
 params.update({"image": True})
-yolo = YOLO(**params)
+yolo = YOLOModel(**params)
 
-TIMEOUT = 80
+TIMEOUT = 4
 NAME = "yolo_service"
 
 
