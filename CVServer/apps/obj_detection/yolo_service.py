@@ -48,8 +48,9 @@ def _predict(img):
 # TestCase
 imgURL = "http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
 image = cvUtil.img_from_url_PIL(imgURL)
+logger.info(">>>>>> img load")
 pred_res = _predict(image)
-print(">>>>>> found classes: {}".format(pred_res))
+logger.info(">>>>>> found classes: {}".format(pred_res))
 
 
 def get_default_res(info="default res"):
@@ -93,3 +94,5 @@ def predict(request):
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
+
+logger.info(">>>> init finished")
