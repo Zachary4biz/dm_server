@@ -7,7 +7,7 @@ else
     echo "在ip: ${localIP} 启动服务"
 fi
 
-conda activate cv2.7
+conda activate cv3.6
 dt=`date +%Y-%m-%d_%H:%M:%S`
 \cp ./CVServer/logs/localhost_access_log.log ./CVServer/logs/localhost_access_log.log.${dt}
 nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ./CVServer/logs/localhost_access_log.log &
