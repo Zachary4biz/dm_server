@@ -14,6 +14,7 @@ from ...util.logger import Logger
 from ...apps.obj_detection import yolo_service
 import time
 import timeout_decorator
+from zac_pyutils.Timeout import TimeoutThread
 
 logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH).get_logger()
 
@@ -61,9 +62,8 @@ def request_service(service, inner_request):
     @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
     def request(inner_request_):
         logger.info("begin predict ..")
-        ress = service.predict(inner_request_)
+        ress = service.predict(inner_request_).content
         logger.info("predict end")
-        ress = ress.content
         res_ = json.loads(ress)['result']
         return res_
     b = time.time()
@@ -76,6 +76,19 @@ def request_service(service, inner_request):
     delta = str(round(time.time() - b, 5) * 1000) + 'ms'
     return res, delta
 
+def request_service_mannual_timeout(service,inner_request):
+    def request(inner_request_):
+        logger.info("begin predict ..")
+        ress = service.predict(inner_request_).content
+        logger.info("predict end")
+        res_ = json.loads(ress)['result']
+        return res_
+    target_thread = TimeoutThread(target=request, args=(inner_request, ), time_limit=service.TIMEOUT)
+    start_time = time.time()
+    res = target_thread.start()
+    res = res if res is not None else service.get_default_res()
+    delta = str(round(time.time() - start_time, 5) * 1000) + 'ms'
+    return res, delta
 
 @csrf_exempt
 def profile_direct_api(request):
@@ -98,7 +111,11 @@ def profile_direct_api(request):
         # nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
         # age_res, age_time = request_service(age_service, inner_request)
         # gender_res, gender_time = request_service(gender_service, inner_request)
-        yolo_res, yolo_time = request_service(yolo_service, inner_request)
+
+        # yolo_res, yolo_time = request_service(yolo_service, inner_request)
+        # yolo_res, yolo_time = request_service_webapi(yolo_service, inner_request)
+        yolo_res, yolo_time = request_service_mannual_timeout(yolo_service, inner_request)
+
         # is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         # NLP features
         # nlp_res_dict = request_nlp(title, desc)
