@@ -1,7 +1,7 @@
 # encoding:utf-8
 # author: zac
 # create-time: 2019-08-23 16:00
-# usage: - 
+# usage: -
 import json
 import time
 from ...util.logger import Logger
@@ -11,7 +11,7 @@ from ...util.cv_util import CVUtil
 import itertools
 
 logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
-
+logger.info("logger ready")
 #########
 # cv part
 #########
@@ -24,6 +24,10 @@ basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 params = YOLOModel._defaults.copy()
 params.update({"image": True})
+for k, v in params:
+    if k in ["model_path","anchors_path","classes_path"]:
+        assert os.path.exists(v), "no model-file found: {}".format(v)
+
 yolo = YOLOModel(**params)
 
 TIMEOUT = 4
