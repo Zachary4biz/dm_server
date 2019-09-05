@@ -41,12 +41,9 @@ NAME = "yolo_service"
 def _predict(img):
     try:
         res = []
-        logger.info("do detect")
         objs_found = yolo.detect_image_noshow(img)
-        logger.info("detect done")
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
-        logger.info("groupby done.")
         return res, "success"
     except Exception as e:
         logger.error(e)
@@ -74,20 +71,16 @@ param_check_list = ['img_url', 'id']
 
 
 def predict(request):
-    logger.info("log at predict now")
     begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):
-        logger.info("cvutil loading image .. ")
         img, delta_t = common_util.timeit(cvUtil.img_from_url_PIL, params['img_url'])
-        logger.info("[finished] cvutil loading image after {:.4f}".format(delta_t))
+        logger.debug("[finished] cvutil loading image after {:.4f}".format(delta_t))
         if img is None:
             logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
         else:
-            logger.info("begin _predict")
             res, remark = _predict(img)
-            logger.info("finished _predict")
             if res is None:
                 json_str = json.dumps({"result": get_default_res(info=remark)})
             else:
