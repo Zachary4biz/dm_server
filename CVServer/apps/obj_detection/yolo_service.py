@@ -24,6 +24,10 @@ basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 params = YOLOModel._defaults.copy()
 params.update({"image": True})
+##################################################################
+# 检测模型等配置文件是否存在
+# 实际上这里在django nohup启动时仍然无效，因为这里还是在子线程抛出的异常
+##################################################################
 for k, v in params:
     if k in ["model_path","anchors_path","classes_path"]:
         assert os.path.exists(v), "no model-file found: {}".format(v)
