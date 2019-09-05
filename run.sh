@@ -18,6 +18,7 @@ if [[ -f ${logfile} ]]; then
     \cp ${logfile} ${logfile}.${dt}
 else
     echo "没有历史日志文件，直接新建"
+    mkdir ./CVServer/logs
 fi
 nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ${logfile} &
 
