@@ -1,7 +1,7 @@
 # author: zac
 # create-time: 2019-07-09 16:25
 # usage: - 
-import urllib
+import urllib.request
 import numpy as np
 import cv2
 import os
@@ -30,22 +30,22 @@ class CVUtil():
     @staticmethod
     def img_from_url_cv2(url):
         try:
-            url_response = urllib.urlopen(url)
+            url_response = urllib.request.urlopen(url)
             img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
             img = cv2.imdecode(img_array, -1)
             return img
-        except Exception, e:
-            print "load img from url failed: "+str(e)
+        except Exception as e:
+            print("load img from url failed: "+str(e))
             return None
 
     @staticmethod
     def img_from_url_PIL(url):
         try:
-            url_response = urllib.urlopen(url)
+            url_response = urllib.request.urlopen(url)
             image = Image.open(BytesIO(url_response.read()))
             return image
-        except Exception, e:
-            print "load img from url failed: "+str(e)
+        except Exception as e:
+            print("load img from url failed: "+str(e))
             return None
 
     @staticmethod
