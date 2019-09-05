@@ -39,7 +39,7 @@ def get_default_res(info="default res"):
 # 专用于predict切分人脸后的图像(caffe io下的格式)
 def _predict_face_caffe_img(face):
     pred = modelClassifier.predict(face)[0]
-    confidence = round(pred[pred.argmax()], 4)
+    confidence = float(round(pred[pred.argmax()], 4))
     return {"id": int(pred.argmax()), "prob": confidence}
 
 
