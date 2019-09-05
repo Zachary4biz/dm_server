@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -e
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate cv3.6
+
 localIP=$1
 if [[ ! -n "${localIP}" ]]; then
     localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -1` # 类似实体机如mac有多个网口（wifi和usb网线）取第一个
@@ -7,8 +11,13 @@ else
     echo "在ip: ${localIP} 启动服务"
 fi
 
-conda activate cv3.6
 dt=`date +%Y-%m-%d_%H:%M:%S`
-\cp ./CVServer/logs/localhost_access_log.log ./CVServer/logs/localhost_access_log.log.${dt}
-nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ./CVServer/logs/localhost_access_log.log &
+logfile="./CVServer/logs/localhost_access_log.log"
+if [[ -f ${logfile} ]]; then
+    echo "上次的日志文件cp加上日期时间后缀（精确到秒）"
+    \cp ${logfile} ${logfile}.${dt}
+else
+    echo "没有历史日志文件，直接新建"
+fi
+nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ${logfile} &
 
