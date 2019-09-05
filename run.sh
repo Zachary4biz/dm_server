@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
+localIP=$1
+if [[ ! -n "${localIP}" ]]; then
+    localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -1` # 类似实体机如mac有多个网口（wifi和usb网线）取第一个
+    echo "未输入ip参数，自动获取ip: ${localIP}"
+else
+    echo "在ip: ${localIP} 启动服务"
+fi
 
 conda activate cv2.7
 dt=`date +%Y-%m-%d_%H:%M:%S`
 \cp ./CVServer/logs/localhost_access_log.log ./CVServer/logs/localhost_access_log.log.${dt}
-nohup python -u manage_cutcut_server.py runserver 10.65.32.218:8000 > ./CVServer/logs/localhost_access_log.log &
+nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ./CVServer/logs/localhost_access_log.log &
 
