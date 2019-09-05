@@ -4,7 +4,6 @@ Class definition of YOLO_v3 style detection model on image and video
 """
 
 import colorsys
-import sys
 # sys.path.append("/Users/zac/server/CVServer/")
 # import os
 from timeit import default_timer as timer
@@ -15,8 +14,8 @@ from keras.models import load_model
 from keras.layers import Input
 from PIL import Image, ImageFont, ImageDraw
 
-from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
-from yolo3.utils import letterbox_image
+from .yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
+from .yolo3.utils import letterbox_image
 import os
 from keras.utils import multi_gpu_model
 import itertools
@@ -24,7 +23,7 @@ import json
 import cv2
 import tensorflow as tf
 
-class YOLO(object):
+class YOLOModel(object):
     _defaults = {
         # "model_path": 'logs/face_detector-ep076-loss7.6752-val_loss7.7060.h5',
         "model_path": os.path.dirname(__file__)+'/model/yolo.h5',
@@ -52,7 +51,7 @@ class YOLO(object):
         with self.graph.as_default():
             self.boxes, self.scores, self.classes = self.generate()
             self.sess = K.get_session()
-            self.graph.finalize()
+            # self.graph.finalize()
 
     def _get_class(self):
         classes_path = os.path.expanduser(self.classes_path)
@@ -258,11 +257,11 @@ def detect_video(yolo, video_path, output_path=""):
 
 if __name__ == '__main__':
     # init
-    params = YOLO._defaults.copy()
+    params = YOLOModel._defaults.copy()
     print(params)
 
     params.update({"image": True})
-    yolo = YOLO(**params)
+    yolo = YOLOModel(**params)
 
     # parse img
     cvUtil = CVUtil()
