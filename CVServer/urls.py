@@ -20,9 +20,9 @@ from django.http import HttpResponse
 # from django.urls.resolvers import RegexURLPattern
 from django.views.decorators.csrf import csrf_exempt
 from . import basic_view
-# from .apps.age import age_service
-# from .apps.gender import gender_service
-# from .apps.nsfw import nsfw_service
+from .apps.age import age_service
+from .apps.gender import gender_service
+from .apps.nsfw import nsfw_service
 from .apps.obj_detection import yolo_service
 from .apps.cutcut import cutcut_profile
 import json
@@ -50,9 +50,9 @@ urlpatterns = [
     # url(r'^$', api_index),
     # url(r'api_index', api_index),
     url(r'hello_post', basic_view.hello_post),
-    # url(r'age', age_service.predict),
-    # url(r'gender', gender_service.predict),
-    # url(r'nsfw', nsfw_service.predict),
+    url(r'age', age_service.predict),
+    url(r'gender', gender_service.predict),
+    url(r'nsfw', nsfw_service.predict),
     url(r'obj_detection', yolo_service.predict),
     url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
     url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile)),
