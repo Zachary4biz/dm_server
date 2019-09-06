@@ -140,6 +140,7 @@ def default_profile(request):
         "age": [],
         "gender": [],
         "ethnic": [],
+        "obj": [],
         "nsfw": {},
         "review_status": [0],
         "title_keywords": [],
