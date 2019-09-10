@@ -5,7 +5,6 @@
 
 import json
 import requests
-import multiprocessing
 from ...util import config, common_util
 from ...util.logger import Logger
 from ...apps.age import age_service
@@ -16,7 +15,7 @@ import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread
 
-logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH).get_logger()
+logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto").get_logger()
 
 
 def request_kw(text, is_title=True):
@@ -77,7 +76,7 @@ def request_service(service, inner_request):
     return res, delta
 
 
-def request_service_mannual_timeout(service,inner_request):
+def request_service_manual_timeout(service, inner_request):
     def request(inner_request_):
         logger.info("begin predict ..")
         ress = service.predict(inner_request_).content
@@ -90,6 +89,7 @@ def request_service_mannual_timeout(service,inner_request):
     res = res if res is not None else service.get_default_res()
     delta = str(round(time.time() - start_time, 5) * 1000) + 'ms'
     return res, delta
+
 
 @csrf_exempt
 def profile_direct_api(request):
@@ -112,7 +112,7 @@ def profile_direct_api(request):
         nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
         age_res, age_time = request_service(age_service, inner_request)
         gender_res, gender_time = request_service(gender_service, inner_request)
-        yolo_res, yolo_time = request_service_mannual_timeout(yolo_service, inner_request)
+        yolo_res, yolo_time = {}, 0  # request_service_manual_timeout(yolo_service, inner_request)
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc) # get NLP features
