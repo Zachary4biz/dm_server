@@ -65,14 +65,14 @@ def request_service(service, inner_request):
         logger.info("predict end")
         res_ = json.loads(ress)['result']
         return res_
-    b = time.time()
+    begin = time.time()
     try:
         logger.info("begin request by {}".format(service.NAME))
         res = request(inner_request)
     except Exception as e:
         logger.error(e)
         res = default
-    delta = str(round(time.time() - b, 5) * 1000) + 'ms'
+    delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
 
 
@@ -84,10 +84,10 @@ def request_service_manual_timeout(service, inner_request):
         res_ = json.loads(ress)['result']
         return res_
     target_thread = TimeoutThread(target=request, args=(inner_request, ), time_limit=service.TIMEOUT)
-    start_time = time.time()
+    begin = time.time()
     res = target_thread.start()
     res = res if res is not None else service.get_default_res()
-    delta = str(round(time.time() - start_time, 5) * 1000) + 'ms'
+    delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
 
 
@@ -121,7 +121,7 @@ def profile_direct_api(request):
                          "review_status": [is_nsfw], "status": "success"})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
-        total_time = str(round(time.time() - begin, 5) * 1000) + "ms"
+        total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
         logger.info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} ".format(id_, img_url,
                                                                                                            res_jsonstr,
