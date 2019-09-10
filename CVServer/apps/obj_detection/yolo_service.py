@@ -2,12 +2,15 @@
 # author: zac
 # create-time: 2019-08-23 16:00
 # usage: -
+import os
+import sys
+sys.path.append(os.path.dirname(__file__)+"../../")
 import json
 import time
-from ...util.logger import Logger
-from ...util import config
-from ...util import common_util
-from ...util.cv_util import CVUtil
+from util.logger import Logger
+from util import config
+from util import common_util
+from util.cv_util import CVUtil
 import itertools
 
 logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
