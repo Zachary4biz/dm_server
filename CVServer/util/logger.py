@@ -66,6 +66,8 @@ class Logger(object):
             fh_defualt.setLevel(loglevel2file)
             fh_defualt.setFormatter(formatter)
             if logfile_err is not None:
+                if logfile_err == "auto":
+                    logfile_err = os.path.splitext(logfile)[0]+"_error"+os.path.splitext(logfile)[1]
                 # 1. 传err文件时，普通的handler只处理INFO级别
                 info_filter = logging.Filter()
                 info_filter.filter = lambda record: record.levelno < logging.WARNING  # 设置过滤等级
