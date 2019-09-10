@@ -2,15 +2,16 @@
 # author: zac
 # create-time: 2019-07-09 15:31
 # usage: - 
-
+import sys
+sys.path.append("../../")
 import json
 import requests
-from ...util import config, common_util
-from ...util.logger import Logger
-from ...apps.age import age_service
-from ...apps.gender import gender_service
-from ...apps.nsfw import nsfw_service
-from ...apps.obj_detection import yolo_service
+from util import config, common_util
+from util.logger import Logger
+from apps.age import age_service
+from apps.gender import gender_service
+from apps.nsfw import nsfw_service
+from apps.obj_detection import yolo_service
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread

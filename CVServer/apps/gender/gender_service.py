@@ -3,12 +3,14 @@
 ##########
 # prepare
 ##########
+import sys
+sys.path.append("../../")
 import json
 import time
-from ...util.logger import Logger
-from ...util import config
-from ...util.common_util import timeit
-from ...util.cv_util import CVUtil
+from util.logger import Logger
+from util import config
+from util.common_util import timeit
+from util.cv_util import CVUtil
 
 logger = Logger('gender_service', log2console=False, log2file=True, logfile=config.GENDER_LOG_PATH).get_logger()
 
