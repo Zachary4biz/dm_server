@@ -109,9 +109,9 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
-        nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
-        age_res, age_time = request_service(age_service, inner_request)
-        gender_res, gender_time = request_service(gender_service, inner_request)
+        nsfw_res, nsfw_time = request_service_manual_timeout(nsfw_service, inner_request)
+        age_res, age_time = request_service_manual_timeout(age_service, inner_request)
+        gender_res, gender_time = request_service_manual_timeout(gender_service, inner_request)
         yolo_res, yolo_time = request_service_manual_timeout(yolo_service, inner_request)
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
