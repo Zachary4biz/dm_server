@@ -6,7 +6,7 @@ Class definition of YOLO_v3 style detection model on image and video
 import colorsys
 import os
 import sys
-sys.path.append(os.path.dirname(__file__)+"../../")
+sys.path.append(os.path.dirname(__file__)+"/../../")
 from timeit import default_timer as timer
 from util.cv_util import CVUtil
 import numpy as np
