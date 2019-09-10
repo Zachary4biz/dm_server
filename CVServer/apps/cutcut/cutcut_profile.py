@@ -156,14 +156,3 @@ def profile(request):
     pass
 
 
-
-# import requests
-# params={
-#     'img_url':'http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg',
-#     'id':'r',
-#     'title':'FM明星大片',
-#     'description':"Rihanna以唐朝风发髻和妆容登上中国版BAZAAR 8月上封面，日日不愧是“山东人，扮起唐装一点也不违和😁"
-# }
-# for i in range(10):
-#     res = requests.post(url="http://127.0.0.1:8999/cutcut_profile", data=params).text
-#     print(">>> i={}".format(i), res)
