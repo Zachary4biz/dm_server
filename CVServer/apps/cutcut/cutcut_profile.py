@@ -125,12 +125,12 @@ def profile_direct_api(request):
         res_jsonstr = json.dumps(res_dict)
         total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
         logger.info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} ".format(id_, img_url,
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} + yolo:{} ".format(id_, img_url,
                                                                                                            res_jsonstr,
                                                                                                            total_time,
                                                                                                            nsfw_time,
                                                                                                            age_time,
-                                                                                                           gender_time))
+                                                                                                           gender_time,yolo_time))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
