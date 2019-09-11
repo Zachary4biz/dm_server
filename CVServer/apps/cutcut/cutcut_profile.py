@@ -80,9 +80,9 @@ def request_service(service, inner_request):
 
 def request_service_manual_timeout(service, inner_request):
     def request(inner_request_):
-        logger.info("begin predict ..")
+        logger.debug("[pid]: {} [service]: {} begin predict ..".format(os.getpid(), service.NAME))
         ress = service.predict(inner_request_).content
-        logger.info("predict end")
+        logger.debug("[pid]: {} [service]: {} predict end".format(os.getpid(), service.NAME))
         res_ = json.loads(ress)['result']
         return res_
     target_thread = TimeoutThread(target=request, args=(inner_request, ), time_limit=service.TIMEOUT)
