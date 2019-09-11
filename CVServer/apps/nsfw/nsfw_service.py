@@ -5,7 +5,7 @@
 ##########
 import os
 import sys
-sys.path.append(os.path.dirname(__file__)+"/../../")
+sys.path.append(os.path.abspath(os.path.dirname(__file__))+"/../../")
 import json
 import time
 from util.logger import Logger
@@ -21,7 +21,7 @@ logger = Logger('nsfw_service', log2console=False, log2file=True, logfile=config
 import os
 os.environ['GLOG_minloglevel'] = '2'
 
-basePath = os.path.dirname(__file__)
+basePath = os.path.abspath(os.path.dirname(__file__))
 cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
                                     caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
@@ -52,8 +52,14 @@ def _predict(img):
 #############
 # Test case
 #############
-imgURL = "https://upload.wikimedia.org/wikipedia/commons/e/ed/Xi_Jinping_2016.jpg"
-print(_predict(cvUtil.img_from_url_cv2(imgURL)))
+imgURL = "http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg"
+from zac_pyutils.Timeout import TimeoutThread
+from zac_pyutils.ExqUtils import zprint
+target_thread = TimeoutThread(target=_predict, args=(cvUtil.img_from_url_cv2(imgURL), ), time_limit=TIMEOUT)
+zprint("begin target_thread")
+res = target_thread.start()
+print("res is:", res)
+# print(_predict(cvUtil.img_from_url_cv2(imgURL)))
 
 #################
 # Django API part
