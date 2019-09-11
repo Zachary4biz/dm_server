@@ -25,7 +25,7 @@ basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
                                     caffemodel_fp=basePath + "/model/full_age.caffemodel")
-TIMEOUT = 5
+TIMEOUT = 8
 NAME = "age_service"
 output = [
     '71+ years',

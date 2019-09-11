@@ -37,7 +37,7 @@ for k, v in params.items():
 
 yolo = YOLOModel(**params)
 
-TIMEOUT = 4
+TIMEOUT = 5
 NAME = "yolo_service"
 
 

@@ -27,7 +27,7 @@ cvUtil = CVUtil()
 modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
                                     caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
 
-TIMEOUT = 4
+TIMEOUT = 8
 NAME = "gender_service"
 output = [
     'female',
