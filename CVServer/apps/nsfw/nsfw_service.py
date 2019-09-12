@@ -23,8 +23,8 @@ os.environ['GLOG_minloglevel'] = '2'
 
 basePath = os.path.abspath(os.path.dirname(__file__))
 cvUtil = CVUtil()
-modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
-                                    caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
+# modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
+#                                     caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
 
 TIMEOUT = 5
 NAME = "nsfw_service"
@@ -41,7 +41,7 @@ def get_default_res(info="default res"):
 def _predict(img):
     try:
         img_pro = cvUtil.pre_cv2caffe(img)
-        pred = modelClassifier.predict(img_pro)[0]
+        pred = None #modelClassifier.predict(img_pro)[0]
         confidence = round(float(pred[pred.argmax()]), 4)
         return {"id": int(pred.argmax()), "prob": confidence}, "success"
     except Exception as e:

@@ -24,8 +24,8 @@ os.environ['GLOG_minloglevel'] = '2'
 
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
-modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
-                                    caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
+# modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
+#                                     caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
 
 TIMEOUT = 8
 NAME = "gender_service"
@@ -41,7 +41,7 @@ def get_default_res(info="default res"):
 
 # 专用于predict切分人脸后的图像(caffe io下的格式)
 def _predict_face_caffe_img(face):
-    pred = modelClassifier.predict(face)[0]
+    pred = None #modelClassifier.predict(face)[0]
     confidence = round(float(pred[pred.argmax()]), 4)
     return {"id": int(pred.argmax()), "prob": confidence}
 

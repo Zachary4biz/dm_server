@@ -35,7 +35,7 @@ for k, v in params.items():
     if k in ["model_path","anchors_path","classes_path"]:
         assert os.path.exists(v), "no model-file found: {}".format(v)
 
-yolo = YOLOModel(**params)
+# yolo = YOLOModel(**params)
 
 TIMEOUT = 5
 NAME = "yolo_service"
@@ -44,7 +44,7 @@ NAME = "yolo_service"
 def _predict(img):
     try:
         res = []
-        objs_found = yolo.detect_image_noshow(img)
+        objs_found = None #yolo.detect_image_noshow(img)
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
         return res, "success"
