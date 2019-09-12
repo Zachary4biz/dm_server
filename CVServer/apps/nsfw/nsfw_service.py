@@ -56,7 +56,7 @@ imgURL = "http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/
 from zac_pyutils.Timeout import TimeoutThread
 from zac_pyutils.ExqUtils import zprint
 target_thread = TimeoutThread(target=_predict, args=(cvUtil.img_from_url_cv2(imgURL), ), time_limit=TIMEOUT)
-zprint("begin target_thread")
+zprint("[nsfw] begin target_thread")
 res = target_thread.start()
 print("res is:", res)
 # print(_predict(cvUtil.img_from_url_cv2(imgURL)))
