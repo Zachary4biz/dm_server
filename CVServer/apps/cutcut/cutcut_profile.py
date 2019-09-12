@@ -127,10 +127,11 @@ def profile_direct_api(request):
         # gender_res, gender_time = request_service_thread_timeout(gender_service, inner_request)
         # yolo_res, yolo_time = request_service_thread_timeout(yolo_service, inner_request)
 
-        nsfw_res, nsfw_time = request_service_process_timeout(nsfw_service, inner_request)
-        age_res, age_time = request_service_process_timeout(age_service, inner_request)
-        gender_res, gender_time = request_service_process_timeout(gender_service, inner_request)
-        yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
+        nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
+        age_res, age_time = request_service(age_service, inner_request)
+        gender_res, gender_time = request_service(gender_service, inner_request)
+        # yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
+        yolo_res, yolo_time = yolo_service.get_default_res(), 0
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc) # get NLP features
