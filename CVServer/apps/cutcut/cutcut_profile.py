@@ -9,10 +9,10 @@ import json
 import requests
 from util import config, common_util
 from util.logger import Logger
-# from apps.age import age_service
-# from apps.gender import gender_service
-# from apps.nsfw import nsfw_service
-# from apps.obj_detection import yolo_service
+from apps.age import age_service
+from apps.gender import gender_service
+from apps.nsfw import nsfw_service
+from apps.obj_detection import yolo_service
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread,TimeoutProcess
@@ -132,10 +132,10 @@ def profile_direct_api(request):
         # gender_res, gender_time = request_service(gender_service, inner_request)
         # yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
 
-        nsfw_res, nsfw_time = {'id': -1, 'prob': 1.0, 'info': "manual"}, 0
-        age_res, age_time = [{'id': -1, 'prob': 1.0, 'info': "manual"}], 0
-        gender_res, gender_time = [{'id': -1, 'prob': 1.0, 'info': "manual"}], 0
-        yolo_res, yolo_time = [], 0
+        nsfw_res, nsfw_time = nsfw_service.get_default_res(),0
+        age_res, age_time = age_service.get_default_res(),0
+        gender_res, gender_time = gender_service.get_default_res(),0
+        yolo_res, yolo_time = yolo_service.get_default_res(), 0
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc) # get NLP features
