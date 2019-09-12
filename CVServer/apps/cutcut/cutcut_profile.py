@@ -15,7 +15,7 @@ from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
 import time
 import timeout_decorator
-from zac_pyutils.Timeout import TimeoutThread
+from zac_pyutils.Timeout import TimeoutThread,TimeoutProcess
 
 logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto").get_logger()
 
@@ -78,14 +78,25 @@ def request_service(service, inner_request):
     return res, delta
 
 
-def request_service_manual_timeout(service, inner_request):
-    def request(inner_request_):
-        logger.debug("[pid]: {} [service]: {} begin predict ..".format(os.getpid(), service.NAME))
-        ress = service.predict(inner_request_).content
-        logger.debug("[pid]: {} [service]: {} predict end".format(os.getpid(), service.NAME))
-        res_ = json.loads(ress)['result']
-        return res_
-    target_thread = TimeoutThread(target=request, args=(inner_request, ), time_limit=service.TIMEOUT)
+def _request(service, inner_request_):
+    logger.debug("[pid]: {} [service]: {} begin predict ..".format(os.getpid(), service.NAME))
+    ress = service.predict(inner_request_).content
+    logger.debug("[pid]: {} [service]: {} predict end".format(os.getpid(), service.NAME))
+    res_ = json.loads(ress)['result']
+    return res_
+
+
+def request_service_process_timeout(service, inner_request):
+    target_p = TimeoutProcess(target=_request, args=(service, inner_request,), time_limit=service.TIMEOUT)
+    begin = time.time()
+    res = target_p.start()
+    res = res if res is not None else service.get_default_res()
+    delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
+    return res, delta
+
+
+def request_service_thread_timeout(service, inner_request):
+    target_thread = TimeoutThread(target=_request, args=(service, inner_request, ), time_limit=service.TIMEOUT)
     begin = time.time()
     res = target_thread.start()
     res = res if res is not None else service.get_default_res()
@@ -111,10 +122,15 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
-        nsfw_res, nsfw_time = request_service_manual_timeout(nsfw_service, inner_request)
-        age_res, age_time = request_service_manual_timeout(age_service, inner_request)
-        gender_res, gender_time = request_service_manual_timeout(gender_service, inner_request)
-        yolo_res, yolo_time = request_service_manual_timeout(yolo_service, inner_request)
+        # nsfw_res, nsfw_time = request_service_thread_timeout(nsfw_service, inner_request)
+        # age_res, age_time = request_service_thread_timeout(age_service, inner_request)
+        # gender_res, gender_time = request_service_thread_timeout(gender_service, inner_request)
+        # yolo_res, yolo_time = request_service_thread_timeout(yolo_service, inner_request)
+
+        nsfw_res, nsfw_time = request_service_process_timeout(nsfw_service, inner_request)
+        age_res, age_time = request_service_process_timeout(age_service, inner_request)
+        gender_res, gender_time = request_service_process_timeout(gender_service, inner_request)
+        yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc) # get NLP features
