@@ -46,7 +46,7 @@ def _predict(img):
         return {"id": int(pred.argmax()), "prob": confidence}, "success"
     except Exception as e:
         logger.error(e)
-        return None, repr(e.message)
+        return None, repr(e)
 
 
 #############

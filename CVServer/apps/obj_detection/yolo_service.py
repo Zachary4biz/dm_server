@@ -50,7 +50,7 @@ def _predict(img):
         return res, "success"
     except Exception as e:
         logger.error(e)
-        return None, repr(e.message)
+        return None, repr(e)
 
 
 # TestCase
