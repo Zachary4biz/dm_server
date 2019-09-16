@@ -70,12 +70,14 @@ PORT = os.environ.get("SERVICE_PORT")
 
 def request_service_http(service, inner_request):
     url, id_ = inner_request.GET['img_url'], inner_request.GET['id']
+    begin = time.time()
     try:
         res = requests.get("http://{}:{}/nsfw?img_url={}&id={}".format(HOST, PORT, url, id_), timeout=service.TIMEOUT).text
     except Exception as e:
         get_logger().error(e)
         res = service.get_default_res()
-    return res
+    delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
+    return res, delta
 
 
 def request_service(service, inner_request):
