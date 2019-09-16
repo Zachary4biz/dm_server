@@ -13,7 +13,14 @@ from util import config
 from util import common_util
 from util.cv_util import CVUtil
 
-logger = Logger('age_service', log2console=False, log2file=True, logfile=config.AGE_LOG_PATH).get_logger()
+logger = None
+
+
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger('age_service', log2console=False, log2file=True, logfile=config.AGE_LOG_PATH).get_logger()
+    return logger
 
 #########
 # cv part
@@ -23,8 +30,17 @@ os.environ['GLOG_minloglevel'] = '2'
 
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
-modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
-                                    caffemodel_fp=basePath + "/model/full_age.caffemodel")
+modelClassifier = None
+
+
+def get_clf():
+    global modelClassifier
+    if modelClassifier is None:
+        modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
+                                            caffemodel_fp=basePath + "/model/full_age.caffemodel")
+    return modelClassifier
+
+
 TIMEOUT = 8
 NAME = "age_service"
 output = [
@@ -44,7 +60,7 @@ def get_default_res(info="default res"):
 
 # 专用于predict切分人脸后的图像(caffe io下的格式)
 def _predict_face_caffe_img(face):
-    pred = modelClassifier.predict(face)[0]
+    pred = get_clf().predict(face)[0]
     confidence = round(float(pred[pred.argmax()]), 4)
     return {"id": int(pred.argmax()), "prob": confidence}
 

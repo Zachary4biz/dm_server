@@ -13,7 +13,14 @@ from util import config
 from util import common_util
 from util.cv_util import CVUtil
 
-logger = Logger('nsfw_service', log2console=False, log2file=True, logfile=config.NSFW_LOG_PATH).get_logger()
+logger = None
+
+
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger('nsfw_service', log2console=False, log2file=True, logfile=config.NSFW_LOG_PATH).get_logger()
+    return logger
 
 #########
 # cv part
@@ -23,8 +30,16 @@ os.environ['GLOG_minloglevel'] = '2'
 
 basePath = os.path.abspath(os.path.dirname(__file__))
 cvUtil = CVUtil()
-modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
-                                    caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
+modelClassifier = None
+
+
+def get_clf():
+    global modelClassifier
+    if modelClassifier is None:
+        modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
+                                            caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
+    return modelClassifier
+
 
 TIMEOUT = 5
 NAME = "nsfw_service"

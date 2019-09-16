@@ -15,9 +15,16 @@ from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
 import time
 import timeout_decorator
-from zac_pyutils.Timeout import TimeoutThread,TimeoutProcess
+from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
 
-logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto").get_logger()
+logger = None
+
+
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto").get_logger()
+    return logger
 
 
 def request_kw(text, is_title=True):

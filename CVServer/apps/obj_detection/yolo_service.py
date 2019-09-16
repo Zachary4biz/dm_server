@@ -13,8 +13,16 @@ from util import common_util
 from util.cv_util import CVUtil
 import itertools
 
-logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
-logger.info("logger ready")
+logger = None
+
+
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
+    return logger
+
+
 #########
 # cv part
 #########
@@ -25,17 +33,24 @@ from .yolo import YOLOModel
 
 basePath = os.path.dirname(__file__)
 cvUtil = CVUtil()
-params = YOLOModel._defaults.copy()
-params.update({"image": True})
-##################################################################
-# 检测模型等配置文件是否存在
-# 实际上这里在django nohup启动时仍然无效，因为这里还是在子线程抛出的异常
-##################################################################
-for k, v in params.items():
-    if k in ["model_path","anchors_path","classes_path"]:
-        assert os.path.exists(v), "no model-file found: {}".format(v)
+yolo = None
 
-yolo = YOLOModel(**params)
+
+def get_clf():
+    global yolo
+    if yolo is None:
+        params = YOLOModel._defaults.copy()
+        params.update({"image": True})
+        ##################################################################
+        # 检测模型等配置文件是否存在
+        # 实际上这里在django nohup启动时仍然无效，因为这里还是在子线程抛出的异常
+        ##################################################################
+        for k, v in params.items():
+            if k in ["model_path", "anchors_path", "classes_path"]:
+                assert os.path.exists(v), "no model-file found: {}".format(v)
+        yolo = YOLOModel(**params)
+    return yolo
+
 
 TIMEOUT = 5
 NAME = "yolo_service"
