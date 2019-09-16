@@ -1,9 +1,11 @@
 # author: zac
 # create-time: 2019-09-16 11:47
 # usage: - 
-from .CVServer.config import *
+import os
 import sys
 import subprocess
+sys.path.append(os.path.join(os.path.abspath("."), "CVServer"))
+from config import *
 
 service_name = sys.argv[1]
 port = CONFIG[service_name]['port']

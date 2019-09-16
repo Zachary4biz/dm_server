@@ -3,12 +3,12 @@
 # usage: - 
 import os
 import sys
+
+sys.path.append(os.path.join(os.path.abspath("."), "CVServer"))
 import subprocess
 import datetime
-
 from zac_pyutils import ExqUtils
-from .CVServer.config import *
-
+from config import *
 
 if sys.argv[1] == "-h" or sys.argv[1] == "--help":
     print("--service 指定开启哪个服务，默认为all")
@@ -26,7 +26,7 @@ def start_service(serv_name):
 
     if os.path.exists(os.path.dirname(LOGFILE)):
         if os.path.exists(LOGFILE):
-            status, output = subprocess.getstatusoutput(r"\cp {} {}".format(LOGFILE, LOGFILE+"."+now))
+            status, output = subprocess.getstatusoutput(r"\cp {} {}".format(LOGFILE, LOGFILE + "." + now))
             print("上次的日志文件cp加上日期时间后缀（精确到秒）. opt-status: {}".format(status))
     else:
         print("日志目录不存在，新建: {}".format(os.path.dirname(LOGFILE)))
