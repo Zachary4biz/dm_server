@@ -13,6 +13,7 @@ from apps.age import age_service
 from apps.gender import gender_service
 from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
+from config import *
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
@@ -65,18 +66,19 @@ param_check_list = ['img_url', 'id', 'title', 'description']
 
 
 HOST = os.environ.get("SERVICE_HOST")
-PORT = os.environ.get("SERVICE_PORT")
 
 
 def request_service_http(service, inner_request):
     url, id_ = inner_request.GET['img_url'], inner_request.GET['id']
     begin = time.time()
+    request_url = "http://{}:{}/nsfw?img_url={}&id={}".format(HOST, CONFIG[service.NAME]['port'], url, id_)
     try:
-        res = requests.get("http://{}:{}/nsfw?img_url={}&id={}".format(HOST, PORT, url, id_), timeout=service.TIMEOUT).text
+        res = requests.get(request_url, timeout=service.TIMEOUT).text
     except Exception as e:
         get_logger().error(e)
         res = service.get_default_res()
     res = json.loads(res)
+    get_logger().debug(">>> service:{}, res:{}, request_url:{}".format(service.NAME, res, request_url))
     delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
 
