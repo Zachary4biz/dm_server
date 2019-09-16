@@ -69,11 +69,11 @@ def _predict(img):
 
 
 # TestCase
-imgURL = "http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
-image = cvUtil.img_from_url_PIL(imgURL)
-get_logger().info(">>>>>> img load")
-pred_res = _predict(image)
-get_logger().info(">>>>>> found classes: {}".format(pred_res))
+# imgURL = "http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
+# image = cvUtil.img_from_url_PIL(imgURL)
+# get_logger().info(">>>>>> img load")
+# pred_res = _predict(image)
+# get_logger().info(">>>>>> found classes: {}".format(pred_res))
 
 
 def get_default_res(info="default res"):
