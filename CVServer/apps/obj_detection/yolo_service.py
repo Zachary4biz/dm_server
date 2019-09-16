@@ -59,7 +59,7 @@ NAME = "yolo_service"
 def _predict(img):
     try:
         res = []
-        objs_found = yolo.detect_image_noshow(img)
+        objs_found = get_clf().detect_image_noshow(img)
         for k, g in itertools.groupby(sorted(objs_found)):
             res.append({"obj": k, "cnt": len(list(g))})
         return res, "success"
