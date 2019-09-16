@@ -57,9 +57,24 @@ from django.views.decorators.csrf import csrf_exempt
 param_check_list = ['img_url', 'id', 'title', 'description']
 
 
+HOST = os.environ.get("SERVICE_HOST")
+PORT = os.environ.get("SERVICE_PORT")
+
+
+def request_service_http(service, inner_request):
+    url, id_ = inner_request.GET['img_url'], inner_request.GET['id']
+    try:
+        res = requests.get("http://{}:{}/nsfw?img_url={}&id={}".format(HOST, PORT, url, id_), timeout=service.TIMEOUT).text
+    except Exception as e:
+        logger.error(e)
+        res = service.get_default_res()
+    return res
+
+
 def request_service(service, inner_request):
     default = service.get_default_res()
     msg = "timeout at {} in {} sec".format(str(service.NAME), service.TIMEOUT)
+
     @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
     def request(inner_request_):
         logger.info("begin predict ..")
@@ -67,6 +82,7 @@ def request_service(service, inner_request):
         logger.info("predict end")
         res_ = json.loads(ress)['result']
         return res_
+
     begin = time.time()
     try:
         logger.info("begin request by {}".format(service.NAME))
@@ -127,11 +143,16 @@ def profile_direct_api(request):
         # gender_res, gender_time = request_service_thread_timeout(gender_service, inner_request)
         # yolo_res, yolo_time = request_service_thread_timeout(yolo_service, inner_request)
 
-        nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
-        age_res, age_time = request_service(age_service, inner_request)
-        gender_res, gender_time = request_service(gender_service, inner_request)
+        # nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
+        # age_res, age_time = request_service(age_service, inner_request)
+        # gender_res, gender_time = request_service(gender_service, inner_request)
         # yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
-        yolo_res, yolo_time = yolo_service.get_default_res(), 0
+        # yolo_res, yolo_time = yolo_service.get_default_res(), 0
+
+        nsfw_res, nsfw_time = request_service_http(nsfw_service, inner_request)
+        age_res, age_time = request_service_http(age_service, inner_request)
+        gender_res, gender_time = request_service_http(gender_service, inner_request)
+        yolo_res, yolo_time = request_service_http(yolo_service, inner_request)
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc) # get NLP features

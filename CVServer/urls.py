@@ -25,6 +25,7 @@ from .apps.gender import gender_service
 from .apps.nsfw import nsfw_service
 from .apps.obj_detection import yolo_service
 from .apps.cutcut import cutcut_profile
+import os
 import json
 
 # django2 没有RegexURLPattern这个类了，暂时没解决，取消获取所有url的接口
@@ -43,17 +44,34 @@ import json
 #             get_all_url(item.urlconf_name, prev + v)
 #     return result
 
+urlpattern_dicts = {
+    "all_in_one": [url(r'hello_post', basic_view.hello_post),
+                   url(r'age', age_service.predict),
+                   url(r'gender', gender_service.predict),
+                   url(r'nsfw', nsfw_service.predict),
+                   url(r'obj_detection', yolo_service.predict),
+                   url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+                   url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))],
+    "age": [url(r'age', age_service.predict)],
+    "gender": [url(r'gender', gender_service.predict)],
+    "nsfw": [url(r'nsfw', nsfw_service.predict)],
+    "obj": [url(r'obj_detection', yolo_service.predict)],
+    "profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+                url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
+}
 
-urlpatterns = [
-    url(r'^admin', admin.site.urls),
-    url(r'hello', basic_view.hello),
-    # url(r'^$', api_index),
-    # url(r'api_index', api_index),
-    url(r'hello_post', basic_view.hello_post),
-    url(r'age', age_service.predict),
-    url(r'gender', gender_service.predict),
-    url(r'nsfw', nsfw_service.predict),
-    url(r'obj_detection', yolo_service.predict),
-    url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
-    url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile)),
-]
+urlpatterns = urlpattern_dicts[os.environ['SERVICE_NAME']]
+
+# urlpatterns = [
+#     url(r'^admin', admin.site.urls),
+#     url(r'hello', basic_view.hello),
+#     # url(r'^$', api_index),
+#     # url(r'api_index', api_index),
+#     url(r'hello_post', basic_view.hello_post),
+#     url(r'age', age_service.predict),
+#     url(r'gender', gender_service.predict),
+#     url(r'nsfw', nsfw_service.predict),
+#     url(r'obj_detection', yolo_service.predict),
+#     url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+#     url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile)),
+# ]
