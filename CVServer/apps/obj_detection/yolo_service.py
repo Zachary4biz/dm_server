@@ -19,7 +19,7 @@ logger = None
 def get_logger():
     global logger
     if logger is None:
-        logger = Logger('yolo_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
+        logger = Logger('obj_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
     return logger
 
 
