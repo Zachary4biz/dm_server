@@ -7,7 +7,7 @@ import subprocess
 import datetime
 
 from zac_pyutils import ExqUtils
-from config import *
+from .CVServer.config import *
 
 
 if sys.argv[1] == "-h" or sys.argv[1] == "--help":
