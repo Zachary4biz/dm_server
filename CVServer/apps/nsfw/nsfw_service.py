@@ -42,7 +42,7 @@ def get_clf():
 
 
 TIMEOUT = 5
-NAME = "nsfw_service"
+NAME = "nsfw"
 output = [
     'normal pic',
     'nsfw pic'

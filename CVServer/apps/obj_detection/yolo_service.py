@@ -53,7 +53,7 @@ def get_clf():
 
 
 TIMEOUT = 5
-NAME = "yolo_service"
+NAME = "yolo"
 
 
 def _predict(img):

@@ -43,7 +43,7 @@ def get_clf():
 
 
 TIMEOUT = 8
-NAME = "gender_service"
+NAME = "gender"
 output = [
     'female',
     'male',

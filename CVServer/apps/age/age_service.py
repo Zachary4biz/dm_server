@@ -42,7 +42,7 @@ def get_clf():
 
 
 TIMEOUT = 8
-NAME = "age_service"
+NAME = "age"
 output = [
     '71+ years',
     '36 - 50 years',
