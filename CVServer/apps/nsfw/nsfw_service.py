@@ -60,7 +60,7 @@ def _predict(img):
         confidence = round(float(pred[pred.argmax()]), 4)
         return {"id": int(pred.argmax()), "prob": confidence}, "success"
     except Exception as e:
-        logger.error(e)
+        get_logger().error(e)
         return None, repr(e.message)
 
 
@@ -89,9 +89,9 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
-        logger.debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
+        get_logger().debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
-            logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
+            get_logger().error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
         else:
             res, remark = _predict(img)
@@ -100,7 +100,7 @@ def predict(request):
             else:
                 res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
-        logger.info(
+        get_logger().info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms [elapsed-load img]: {}ms".format(params['id'], params['img_url'], json_str,
                                                                        round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")

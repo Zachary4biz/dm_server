@@ -64,16 +64,16 @@ def _predict(img):
             res.append({"obj": k, "cnt": len(list(g))})
         return res, "success"
     except Exception as e:
-        logger.error(e)
+        get_logger().error(e)
         return None, repr(e.message)
 
 
 # TestCase
 imgURL = "http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
 image = cvUtil.img_from_url_PIL(imgURL)
-logger.info(">>>>>> img load")
+get_logger().info(">>>>>> img load")
 pred_res = _predict(image)
-logger.info(">>>>>> found classes: {}".format(pred_res))
+get_logger().info(">>>>>> found classes: {}".format(pred_res))
 
 
 def get_default_res(info="default res"):
@@ -93,9 +93,9 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_PIL, params['img_url'])
-        logger.debug("[finished] cvutil loading image after {:.4f}".format(delta_t))
+        get_logger().debug("[finished] cvutil loading image after {:.4f}".format(delta_t))
         if img is None:
-            logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
+            get_logger().error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
         else:
             res, remark = _predict(img)
@@ -103,7 +103,7 @@ def predict(request):
                 json_str = json.dumps({"result": get_default_res(info=remark)})
             else:
                 json_str = json.dumps({"result": res})
-        logger.info(
+        get_logger().info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms [elapsed-load img]: {}ms".format(params['id'],
                                                                                                 params['img_url'],
                                                                                                 json_str,
@@ -114,4 +114,4 @@ def predict(request):
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
 
-logger.info(">>>> init finished")
+get_logger().info(">>>> init finished")

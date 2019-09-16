@@ -36,7 +36,7 @@ def request_kw(text, is_title=True):
             keywords = [i.split(":") for i in res.text.strip().split("\t")]
             keywords = [{"keyword": kw, "weight": score} for kw, score in keywords]
     except Exception as e:
-        logger.error(e)
+        get_logger().error(e)
     return keywords
 
 
@@ -47,7 +47,7 @@ def request_nlp(title, content):
             content_kw = request_kw(content, is_title=False)
             nlp_res = {"title_keywords": title_kw, "content_keywords": content_kw}
         except Exception as e:
-            logger.error(repr(e))
+            get_logger().error(repr(e))
             nlp_res = {"title_keywords": [], "content_keywords": []}
     else:
         nlp_res = {"title_keywords": [], "content_keywords": []}
@@ -73,7 +73,7 @@ def request_service_http(service, inner_request):
     try:
         res = requests.get("http://{}:{}/nsfw?img_url={}&id={}".format(HOST, PORT, url, id_), timeout=service.TIMEOUT).text
     except Exception as e:
-        logger.error(e)
+        get_logger().error(e)
         res = service.get_default_res()
     return res
 
@@ -84,27 +84,27 @@ def request_service(service, inner_request):
 
     @timeout_decorator.timeout(seconds=service.TIMEOUT, use_signals=False, exception_message=msg)
     def request(inner_request_):
-        logger.info("begin predict ..")
+        get_logger().info("begin predict ..")
         ress = service.predict(inner_request_).content
-        logger.info("predict end")
+        get_logger().info("predict end")
         res_ = json.loads(ress)['result']
         return res_
 
     begin = time.time()
     try:
-        logger.info("begin request by {}".format(service.NAME))
+        get_logger().info("begin request by {}".format(service.NAME))
         res = request(inner_request)
     except Exception as e:
-        logger.error(e)
+        get_logger().error(e)
         res = default
     delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
 
 
 def _request(service, inner_request_):
-    logger.debug("[pid]: {} [service]: {} begin predict ..".format(os.getpid(), service.NAME))
+    get_logger().debug("[pid]: {} [service]: {} begin predict ..".format(os.getpid(), service.NAME))
     ress = service.predict(inner_request_).content
-    logger.debug("[pid]: {} [service]: {} predict end".format(os.getpid(), service.NAME))
+    get_logger().debug("[pid]: {} [service]: {} predict end".format(os.getpid(), service.NAME))
     res_ = json.loads(ress)['result']
     return res_
 
@@ -137,7 +137,7 @@ def profile_direct_api(request):
         id_ = params.get("id")
         title = params.get("title")
         desc = params.get("description")
-        logger.debug(u" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title[:50], desc[:50]))
+        get_logger().debug(u" [img_url]:{} [id]:{} [title]:{} [desc]:{}".format(img_url, id_, title[:50], desc[:50]))
         # features
         res_dict = {}
         # CV features
@@ -169,7 +169,7 @@ def profile_direct_api(request):
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
-        logger.info(
+        get_logger().info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} + yolo:{} ".format(id_, img_url,
                                                                                                            res_jsonstr,
                                                                                                            total_time,
