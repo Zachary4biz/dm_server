@@ -3,6 +3,9 @@ set -e
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate cv3.6
 
+echo "use start.sh"
+exit 1
+
 localIP=$1
 if [[ ! -n "${localIP}" ]]; then
     localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -1` # 类似实体机如mac有多个网口（wifi和usb网线）取第一个
