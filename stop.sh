@@ -17,7 +17,7 @@ else
     echo "将kill服务: ${service_name}"
 fi
 
-python -u _stop_service.py service_name
+python -u _stop_service.py ${service_name}
 
 echo "remaining as follow:"
 ps -ef | grep "cutcut"
