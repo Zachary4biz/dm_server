@@ -55,7 +55,7 @@ urlpattern_dicts = {
     "age": [url(r'age', age_service.predict)],
     "gender": [url(r'gender', gender_service.predict)],
     "nsfw": [url(r'nsfw', nsfw_service.predict)],
-    "obj": [url(r'obj_detection', yolo_service.predict)],
+    "obj": [url(r'obj', yolo_service.predict)],
     "profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
                 url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
 }

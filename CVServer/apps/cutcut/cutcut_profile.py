@@ -71,7 +71,8 @@ HOST = os.environ.get("SERVICE_HOST")
 def request_service_http(service, inner_request):
     url, id_ = inner_request.GET['img_url'], inner_request.GET['id']
     begin = time.time()
-    request_url = "http://{}:{}/nsfw?img_url={}&id={}".format(HOST, CONFIG[service.NAME]['port'], url, id_)
+    request_url = "http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG[service.NAME]['port'], service.NAME, url, id_)
+    get_logger().debug(">>> service:{}, request_url:{}".format(service.NAME, request_url))
     try:
         res = requests.get(request_url, timeout=service.TIMEOUT).text
     except Exception as e:
