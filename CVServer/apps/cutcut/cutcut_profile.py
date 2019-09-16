@@ -76,6 +76,7 @@ def request_service_http(service, inner_request):
     except Exception as e:
         get_logger().error(e)
         res = service.get_default_res()
+        res = json.loads(res)
     delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
 
