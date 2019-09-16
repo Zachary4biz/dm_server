@@ -53,7 +53,7 @@ def get_clf():
 
 
 TIMEOUT = 5
-NAME = "yolo"
+NAME = "obj"
 
 
 def _predict(img):

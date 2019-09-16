@@ -75,10 +75,10 @@ def request_service_http(service, inner_request):
     get_logger().debug(">>> service:{}, request_url:{}".format(service.NAME, request_url))
     try:
         res = requests.get(request_url, timeout=service.TIMEOUT).text
+        res = json.loads(res)['result']
     except Exception as e:
         get_logger().error(e)
         res = service.get_default_res()
-    res = json.loads(res)
     get_logger().debug(">>> service:{}, res:{}, request_url:{}".format(service.NAME, res, request_url))
     delta = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta
