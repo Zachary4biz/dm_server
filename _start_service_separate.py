@@ -42,6 +42,7 @@ def start_service(serv_name):
 
 if SERVICE == "all":
     print("分别启动所有服务")
+    assert False, "使用starts.sh里循环bash启动所有 | 不支持一个py内部起多个django服务，会导致environ冲突（属于同一个py进程，共用environ）"
     for i in CONFIG.keys():
         start_service(i)
 else:
