@@ -18,6 +18,7 @@ import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
 from multiprocessing import Pool
+import traceback
 
 logger = None
 
@@ -81,7 +82,7 @@ def request_service_http_multiProcess(zipped_param):
         res = requests.get(request_url_inp, timeout=ser_timeout).text
         res = json.loads(res)['result']
     except Exception as e:
-        is_success = str(e)
+        is_success = repr(e) + "\t" + traceback.print_exc()
         res = ser_default
     delta_t = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta_t, is_success
@@ -196,13 +197,16 @@ def profile_direct_api(request):
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list]
         url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG[ser['NAME']]['port'], ser['NAME'], img_url, id_) for ser in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
+        p.join()
         result = dict(zip([i['NAME'] for i in service_list], r))  # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
 
         # 取出标记检查是否为success
         for k, v in result.items():
             res, delta_t, is_success = v
             if is_success != "success":
-                get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success))
+                print(is_success)
+                get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success.split("\t")[0]))
+                get_logger().error(is_success)
         nsfw_res, nsfw_time, _ = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
         age_res, age_time, _ = result['age']
         gender_res, gender_time, _ = result['gender']
