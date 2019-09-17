@@ -17,6 +17,7 @@ from config import *
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
+from multiprocessing import Pool
 
 logger = None
 
@@ -66,6 +67,24 @@ param_check_list = ['img_url', 'id', 'title', 'description']
 
 
 HOST = os.environ.get("SERVICE_HOST")
+
+
+# 为了用multiprocessing，需要避免用到module（不能pickle），所以把service用到的属性取出来作为字典
+def request_service_http_multiProcess(zipped_param):
+    service_info, request_url_inp = zipped_param
+    ser_timeout = service_info['TIMEOUT']
+    ser_default = service_info['default_res']
+    begin = time.time()
+    is_success = "success"
+    print(">>> service:{}, request_url:{}".format(service_info['NAME'], request_url_inp))
+    try:
+        res = requests.get(request_url_inp, timeout=ser_timeout).text
+        res = json.loads(res)['result']
+    except Exception as e:
+        is_success = str(e)
+        res = ser_default
+    delta_t = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
+    return res, delta_t, is_success
 
 
 def request_service_http(service, inner_request):
@@ -162,13 +181,35 @@ def profile_direct_api(request):
         # yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
         # yolo_res, yolo_time = yolo_service.get_default_res(), 0
 
-        nsfw_res, nsfw_time = request_service_http(nsfw_service, inner_request)
-        age_res, age_time = request_service_http(age_service, inner_request)
-        gender_res, gender_time = request_service_http(gender_service, inner_request)
-        yolo_res, yolo_time = request_service_http(yolo_service, inner_request)
+        # nsfw_res, nsfw_time = request_service_http(nsfw_service, inner_request)
+        # age_res, age_time = request_service_http(age_service, inner_request)
+        # gender_res, gender_time = request_service_http(gender_service, inner_request)
+        # yolo_res, yolo_time = request_service_http(yolo_service, inner_request)
+
+        # class abc():
+        #     def __init__(self):
+        #         self.GET={"img_url": img_url, "id": id_}
+        # inner_request = abc()
+
+        p = Pool(4)
+        service_list = [nsfw_service, age_service, gender_service, yolo_service]
+        service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list]
+        url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG[ser['NAME']]['port'], ser['NAME'], img_url, id_) for ser in service_list]*len(service_list)
+        r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
+        result = dict(zip([i['NAME'] for i in service_list], r))  # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
+
+        # 取出标记检查是否为success
+        for k, v in result.items():
+            res, delta_t, is_success = v
+            if is_success != "success":
+                get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success))
+        nsfw_res, nsfw_time, _ = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
+        age_res, age_time, _ = result['age']
+        gender_res, gender_time, _ = result['gender']
+        yolo_res, yolo_time, _ = result['obj']
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
-        nlp_res_dict = request_nlp(title, desc) # get NLP features
+        nlp_res_dict = request_nlp(title, desc)  # get NLP features
 
         res_dict.update({"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res,
                          "review_status": [is_nsfw], "status": "success"})
@@ -177,11 +218,11 @@ def profile_direct_api(request):
         total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
         get_logger().info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} + yolo:{} ".format(id_, img_url,
-                                                                                                           res_jsonstr,
-                                                                                                           total_time,
-                                                                                                           nsfw_time,
-                                                                                                           age_time,
-                                                                                                           gender_time,yolo_time))
+                                                                                                                     res_jsonstr,
+                                                                                                                     total_time,
+                                                                                                                     nsfw_time,
+                                                                                                                     age_time,
+                                                                                                                     gender_time, yolo_time))
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:
