@@ -26,7 +26,7 @@ logger = None
 def get_logger():
     global logger
     if logger is None:
-        logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto", loglevel2file=0).get_logger()
+        logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto", loglevel2file=20).get_logger()
     return logger
 
 
