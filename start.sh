@@ -17,6 +17,14 @@ else
 fi
 
 localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -1` # 类似实体机如mac有多个网口（wifi和usb网线）取第一个
-python -u _start_service_separate.py --service ${service_name} --host ${localIP}
-
+if [[ ${service_name} = "all" ]]; then
+    echo "执行 all， 依次启动各个服务: "
+    for service in "profile" "age" "gender" "nsfw" "obj"
+    do
+        echo "    开启 ${service}"
+        python -u _start_service_separate.py --service ${service} --host ${localIP}
+    done
+else
+    python -u _start_service_separate.py --service ${service_name} --host ${localIP}
+fi
 
