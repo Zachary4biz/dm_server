@@ -45,7 +45,7 @@ import json
 #     return result
 
 urlpattern_dicts = {
-    "all_in_one": [url(r'hello_post', basic_view.hello_post),
+    "all": [url(r'hello_post', basic_view.hello_post),
                    url(r'age', age_service.predict),
                    url(r'gender', gender_service.predict),
                    url(r'nsfw', nsfw_service.predict),
