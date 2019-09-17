@@ -22,7 +22,7 @@ if [[ ${service_name} = "all" ]]; then
     for service in "profile" "age" "gender" "nsfw" "obj"
     do
         echo "    开启 ${service}"
-        python -u _start_service_separate.py --service ${service_name} --host ${localIP}
+        python -u _start_service_separate.py --service ${service} --host ${localIP}
     done
 else
     python -u _start_service_separate.py --service ${service_name} --host ${localIP}
