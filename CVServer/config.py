@@ -5,7 +5,7 @@ import os
 path = os.path.join(os.path.abspath("."), "logs/localhost_{}.log")
 CONFIG = {
     'profile': {
-        "port": 8000,
+        "port": 8999,
         "host_logfile": path.format("profile")
     },
     'age': {
