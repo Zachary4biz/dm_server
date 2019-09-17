@@ -77,7 +77,7 @@ def request_service_http_multiProcess(zipped_param):
     ser_default = service_info['default_res']
     begin = time.time()
     is_success = "success"
-    print(">>> service:{}, request_url:{}".format(service_info['NAME'], request_url_inp))
+    # print(">>> service:{}, request_url:{}".format(service_info['NAME'], request_url_inp))
     try:
         res = requests.get(request_url_inp, timeout=ser_timeout).text
         res = json.loads(res)['result']
@@ -204,7 +204,7 @@ def profile_direct_api(request):
         for k, v in result.items():
             res, delta_t, is_success = v
             if is_success != "success":
-                print(is_success)
+                # print(is_success)
                 get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success.split("\t")[0]))
                 get_logger().error(is_success)
         nsfw_res, nsfw_time, _ = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
