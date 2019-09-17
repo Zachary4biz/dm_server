@@ -82,7 +82,7 @@ def request_service_http_multiProcess(zipped_param):
         res = requests.get(request_url_inp, timeout=ser_timeout).text
         res = json.loads(res)['result']
     except Exception as e:
-        is_success = repr(e) + "\t" + traceback.print_exc()
+        is_success = str(repr(e)) + "\t" + traceback.format_exc()
         res = ser_default
     delta_t = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
     return res, delta_t, is_success
