@@ -114,4 +114,4 @@ def predict(request):
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
 
-get_logger().info(">>>> init finished")
+# get_logger().info(">>>> init finished") # 可以打开注释，用来检验django服务是否有重启？是否有多次初始化
