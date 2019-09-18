@@ -110,3 +110,4 @@ build
 .vscode
 CVServer/logs/
 /CVServer/apps/obj_detection/model/yolo.h5
+model/
