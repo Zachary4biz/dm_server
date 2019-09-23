@@ -20,8 +20,8 @@ CONFIG = {
         "port": 8004,
         "host_logfile": path.format("obj")
     },
-    'profile': {
+    'cutcut_profile': {
         "port": 8000,
-        "host_logfile": path.format("profile")
+        "host_logfile": path.format("cutcut_profile")
     },
 }

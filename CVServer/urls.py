@@ -56,8 +56,8 @@ urlpattern_dicts = {
     "gender": [url(r'gender', gender_service.predict)],
     "nsfw": [url(r'nsfw', nsfw_service.predict)],
     "obj": [url(r'obj', yolo_service.predict)],
-    "profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
-                url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
+    "cutcut_profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+                       url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
 }
 
 urlpatterns = urlpattern_dicts[os.environ['SERVICE_NAME']]
