@@ -13,8 +13,8 @@ def kill_service(service_name_inp):
     print("    将kill服务:{} at port:{}".format(service_name_inp, port))
     status, output = subprocess.getstatusoutput(r"ps -ef | grep ':{}' | grep -v 'grep'".format(port))
     if status != 0:
-        assert False, "ps -ef grep操作失败: service:{} status:{} output:{}".format(service_name_inp, status, output)
-
+        print("[ERROR] grep操作失败: [service]:{} [port]:{} [status]:{} [output]:{}".format(service_name_inp, port, status, output))
+        return
     res = []
     for line in output.split("\n"):
         params = [i for i in line.split(" ") if i != ""]
