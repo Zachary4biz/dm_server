@@ -3,7 +3,8 @@
 # usage: - 
 import os
 import sys
-
+import time
+import requests
 sys.path.append(os.path.join(os.path.abspath("."), "CVServer"))
 import subprocess
 import datetime
@@ -17,6 +18,20 @@ if sys.argv[1] == "-h" or sys.argv[1] == "--help":
 args_dict = ExqUtils.parse_argv(sys.argv)
 SERVICE = args_dict['service']
 HOST = args_dict['host']
+
+
+def test_service(serv_name):
+    PORT = CONFIG[serv_name]['port']
+    profile_post_params = {
+        'img_url': 'http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg',
+        'id': -1,
+        'title': 'FM明星大片',
+        'description': 'Rihanna以唐朝风发髻和妆容登上中国版BAZAAR 8月上封面，日日不愧是“山东人，扮起唐装一点也不违和😁'
+    }
+    url = "http://{host}:{port}/{service}".format(host=HOST, port=PORT, service=serv_name)
+    b = time.time()
+    res = requests.post(url=url, data=profile_post_params, timeout=60).text  # 第一次请求会初始化模型，超时时间设长一些
+    print(">>> Test on {}: [time]:{} [res]:{}".format(serv_name, str(time.time() - b), res))
 
 
 def start_service(serv_name):
@@ -47,5 +62,6 @@ if SERVICE == "all":
         start_service(i)
 else:
     start_service(SERVICE)
+    test_service(SERVICE)
 
 # nohup python -u manage_cutcut_server.py runserver ${localIP}:8000 > ${logfile}  2>&1 &
