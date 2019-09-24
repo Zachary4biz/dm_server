@@ -207,16 +207,16 @@ def profile_direct_api(request):
                 # print(is_success)
                 get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success.split("\t")[0]))
                 get_logger().debug(is_success)
-        nsfw_res, nsfw_time, _ = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
-        age_res, age_time, _ = result['age']
-        gender_res, gender_time, _ = result['gender']
-        yolo_res, yolo_time, _ = result['obj']
+        nsfw_res, nsfw_time, nsfw_success = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
+        age_res, age_time, age_success = result['age']
+        gender_res, gender_time, gender_success = result['gender']
+        yolo_res, yolo_time, yolo_success = result['obj']
 
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc)  # get NLP features
 
         res_dict.update({"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res,
-                         "review_status": [is_nsfw], "status": "success"})
+                         "review_status": [is_nsfw], "status": all(i == "success" for i in [nsfw_success, age_success, gender_success, yolo_success])})
         res_dict.update(nlp_res_dict)
         res_jsonstr = json.dumps(res_dict)
         total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
