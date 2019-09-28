@@ -15,6 +15,7 @@ import glob
 import json
 import tarfile
 import time
+import subprocess
 
 # import sys
 # curr_path = os.path.dirname(os.path.realpath(__file__))
@@ -324,23 +325,78 @@ class Predict(object):
 
 
 
+
 if __name__ == "__main__":
+    from you_get import common
+    import re
+    def download(source_url,debug=False):
+        def debug_print(*inp):
+            inp_str = " ".join([str(i) for i in inp])
+            if debug:
+                print(inp_str)
+
+        tmpDir = "./tmpDownloadVideos"
+        fName = source_url
+        video_url = "https://www.youtube.com/watch?v={}".format(source_url)
+        debug_print("video_url is: ", video_url)
+        # 先查询视频的格式和大小，取到itag
+        m, url = common.url_to_module(video_url)
+        m.site.url = video_url
+        m.site.prepare()
+        itag_list = []
+        for k, v in m.site.dash_streams.items():
+            v.update({"Q": re.findall(r"(?<=\()[^)]+(?=\))", v['quality'])[0]})
+            if v['mime'] == 'video/mp4' and v['size'] <= 150*1024*1024:  # 只取MP4且小于150M的视频
+                itag_list.append((v['itag'], v['Q'], v['size'], v['mime']))
+        itag_list.sort(key=lambda x: x[2])  # 按size升序排列
+        debug_print("itag_list is:\n"+"\n".join([str(i) for i in itag_list]))
+        qualify = [i for i in itag_list if i[1] >= '480p']
+        debug_print("qualify is:\n" + "\n".join([str(i) for i in qualify]))
+        if len(qualify) > 0:
+            itag = qualify[0][0]  # 取>=360p中size最小的
+        else:
+            itag = itag_list[-1][0]  # 如果全都<360p则取size最大的
+        # 根据itag下载合适的视频
+        cmd = "you-get --itag={itag} --no-caption -o {dir_name} -O {f_name} {vurl}".format(itag=itag, dir_name=tmpDir, f_name=fName, vurl=video_url)
+        debug_print("use [itag]: ", itag)
+        debug_print("use [cmd:]: ", cmd)
+        status, output = subprocess.getstatusoutput(cmd)
+        if status == 0:
+            video_path = os.path.join(tmpDir, fName + ".mp4")
+            return video_path
+        else:
+            assert False, "[ERROR] can't download video from: {}\n{}".format(video_url, output)
+
+    from tqdm.auto import tqdm
+    from zac_pyutils import ExqLog
     from extract_feature_main import ExtractFeature
+    logger = ExqLog.get_file_logger(info_log_file="./log/log.out", err_log_file="./log/log_err.out")
     flags = load_flags_config()
     idxmap = load_idxmap("/Users/zac/server/CVServer/apps/video_classify/model/predict_models/vocabulary.csv")
     ef = ExtractFeature(flags)
-    video_file = "/Users/zac/Downloads/vidoe1.mp4"
-    s = time.time()
-    fe = ef.extract(video_file)
-    # print(fe)
-    e = time.time()
-    print(">> 抽取视频特征耗时{}s".format(e - s))
-    p = Predict(flags)
+    with open("/Users/zac/Downloads/videoInfo.out", "r") as fr:
+        content = [i.strip().split("\t")[-1] for i in fr.readlines()]
+        content = [json.loads(i) for i in content]
+    for c in tqdm(content):
+        id_ = c['id']
+        # source_url = c['source_url']
+        source_url = "J37evpYs28M"
+        b = time.time()
+        video_file = download(source_url, debug=True)
+        logger.info(">> 下载视频耗时{}s".format(time.time() - b))
+        fe = ef.extract(video_file)
+        s = time.time()
+        e = time.time()
+        logger.info(">> 抽取视频特征耗时{}s".format(e - s))
+        subprocess.getstatusoutput("mv {} ~/.Trash/".format(video_file))
+        p = Predict(flags)
 
-    s1 = time.time()
-    # app.run(p.predict_with_tfrecord(fe))
-    p.predict(fe, idxmap)
-    print(p.out[0])
-    e1 = time.time()
-    print(">> 模型分类耗时{}s".format(e1-s1))
-    p.sess.close()
+        s1 = time.time()
+        p.predict(fe, idxmap)
+        e1 = time.time()
+        logger.info(">> 模型分类耗时{}s".format(e1-s1))
+        p.sess.close()
+
+        logger.info(">>> [id]: {} [res]: {}\n\n".format(id_, p.out[0]))
+        assert False
+
