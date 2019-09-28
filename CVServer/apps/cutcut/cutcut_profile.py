@@ -216,8 +216,10 @@ def profile_direct_api(request):
         nlp_res_dict = request_nlp(title, desc)  # get NLP features
 
         res_dict.update({"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res,
-                         "review_status": [is_nsfw], "status": all(i == "success" for i in [nsfw_success, age_success, gender_success, yolo_success])})
+                         "review_status": [is_nsfw]})
         res_dict.update(nlp_res_dict)
+        final_status = "success" if all(i == "success" for i in [nsfw_success, age_success, gender_success, yolo_success]) else "fail"
+        res_dict.update({"status": final_status})
         res_jsonstr = json.dumps(res_dict)
         total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
         get_logger().info(
