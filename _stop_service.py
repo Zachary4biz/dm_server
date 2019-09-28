@@ -10,10 +10,10 @@ from config import *
 
 def kill_service(service_name_inp):
     port = CONFIG[service_name_inp]['port']
-    print("    将kill服务:{} at port:{}".format(service_name_inp, port))
+    print("    -将kill服务:{} at port:{}".format(service_name_inp, port))
     status, output = subprocess.getstatusoutput(r"ps -ef | grep ':{}' | grep -v 'grep'".format(port))
     if status != 0:
-        print("[ERROR] grep操作失败: [service]:{} [port]:{} [status]:{} [output]:{}".format(service_name_inp, port, status, output))
+        print("    [ERROR] grep操作失败: [service]:{} [port]:{} [status]:{} [output]:{}".format(service_name_inp, port, status, output))
         return
     res = []
     for line in output.split("\n"):
