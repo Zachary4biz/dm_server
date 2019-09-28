@@ -372,9 +372,10 @@ if __name__ == "__main__":
     from extract_feature_main import ExtractFeature
     logger = ExqLog.get_file_logger(info_log_file="./log/log.out", err_log_file="./log/log_err.out")
     flags = load_flags_config()
-    idxmap = load_idxmap("/Users/zac/server/CVServer/apps/video_classify/model/predict_models/vocabulary.csv")
+    model_dir = os.path.abspath(os.path.join(os.path.abspath(__file__), "../../model"))
+    idxmap = load_idxmap(model_dir+"/predict_models/vocabulary.csv")
     ef = ExtractFeature(flags)
-    with open("/Users/zac/Downloads/videoInfo.out", "r") as fr:
+    with open(model_dir+"/predict_models/videoInfo.out", "r") as fr:
         content = [i.strip().split("\t")[-1] for i in fr.readlines()]
         content = [json.loads(i) for i in content]
     for c in tqdm(content):
