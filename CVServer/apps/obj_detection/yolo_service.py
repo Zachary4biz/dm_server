@@ -34,7 +34,7 @@ yolo = None
 def get_clf():
     global yolo
     if yolo is None:
-        basePath = os.path.dirname(__file__)
+        get_logger().info(">>> loading clf (should be init)")
         params = YOLOModel._defaults.copy()
         params.update({"image": True})
         ##################################################################
