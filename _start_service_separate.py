@@ -66,13 +66,13 @@ def start_service(serv_name):
     -b {HOST}:{PORT} \
     -w {service_param.worker_num} \
     --access-logfile {service_param.gunicorn_logfile} \
-    --error-logfile {service_param.gunicorn_logfile+".err"} \
-    -k gevent \
+    --error-logfile {service_param.gunicorn_logfile+".opt"} \
+    --worker-class gevent \
     2>&1 &
     """.strip()
     status, output = subprocess.getstatusoutput(gunicorn_cmd)
     print(">>> 启动服务 {} 于 {}:{} ".format(serv_name, HOST, PORT))
-    print(">>> {}: subprocess status is: {}, output is: {}".format("SUCCESS" if status == 0 else "FAIL", status, output))
+    print(">>> {}: subprocess status is: ' {} ', output is: ' {} '".format("SUCCESS" if status == 0 else "FAIL", status, output))
 
 
 if SERVICE == "all":
