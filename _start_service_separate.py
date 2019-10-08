@@ -60,7 +60,7 @@ def start_service(serv_name):
     os.environ.setdefault("SERVICE_PORT", str(PORT))  # 同上
     # status, output = subprocess.getstatusoutput('nohup python -u manage_cutcut_server.py runserver {}:{} > {} 2>&1 &'.format(HOST, PORT, LOGFILE))
     # gunicorn 启动
-    status, output = subprocess.getstatusoutput('nohup gunicorn server.wsgi:application -b 127.0.0.1 2>&1 &')
+    status, output = subprocess.getstatusoutput('nohup gunicorn CVServer.wsgi:application -b {}:{}  2>&1 &'.format(HOST, PORT))
     print(">>> 启动服务 {} 于 {}:{} ".format(serv_name, HOST, PORT))
     print(">>> {}: subprocess status is: {}, output is: {}".format("SUCCESS" if status == 0 else "FAIL", status, output))
 

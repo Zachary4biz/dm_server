@@ -14,19 +14,19 @@ class Params:
 
 
 CONFIG_NEW = {
-    'age': Params(port_=8001,
+    'age': Params(port_=9001,
                   host_logfile_=host_logfile.format("age"),
                   gunicorn_logfile_=gunicorn_logfile.format("age")),
-    'gender': Params(port_=8002,
+    'gender': Params(port_=9002,
                      host_logfile_=host_logfile.format("gender"),
                      gunicorn_logfile_=gunicorn_logfile.format("gender")),
-    'nsfw': Params(port_=8003,
+    'nsfw': Params(port_=9003,
                    host_logfile_=host_logfile.format("nsfw"),
                    gunicorn_logfile_=gunicorn_logfile.format("nsfw")),
-    'obj': Params(port_=8004,
+    'obj': Params(port_=9004,
                   host_logfile_=host_logfile.format("obj"),
                   gunicorn_logfile_=gunicorn_logfile.format("obj")),
-    'cutcut_profile': Params(port_=8000,
+    'cutcut_profile': Params(port_=9000,
                              host_logfile_=host_logfile.format("cutcut_profile"),
                              gunicorn_logfile_=gunicorn_logfile.format("cutcut_profile")),
 }
