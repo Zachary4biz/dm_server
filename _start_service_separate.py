@@ -43,8 +43,9 @@ def test_service(serv_name):
 
 
 def start_service(serv_name):
-    PORT = CONFIG_NEW[serv_name].port
-    LOGFILE = CONFIG_NEW[serv_name].host_logfile
+    service_param = CONFIG_NEW[serv_name]
+    PORT = service_param.port
+    LOGFILE = service_param.host_logfile
     now = datetime.datetime.strftime(datetime.datetime.today(), "%Y-%m-%d_%H:%M:%S")
 
     if os.path.exists(os.path.dirname(LOGFILE)):
@@ -60,7 +61,16 @@ def start_service(serv_name):
     os.environ.setdefault("SERVICE_PORT", str(PORT))  # 同上
     # status, output = subprocess.getstatusoutput('nohup python -u manage_cutcut_server.py runserver {}:{} > {} 2>&1 &'.format(HOST, PORT, LOGFILE))
     # gunicorn 启动
-    status, output = subprocess.getstatusoutput('nohup gunicorn CVServer.wsgi:application -b {}:{}  2>&1 &'.format(HOST, PORT))
+    gunicorn_cmd = f"""
+    nohup gunicorn CVServer.wsgi:application \
+    -b {HOST}:{PORT} \
+    -w {service_param.worker_num} \
+    --access-logfile {service_param.gunicorn_logfile} \
+    --error-logfile {service_param.gunicorn_logfile+".err"} \
+    -k gevent \
+    2>&1 &
+    """.strip()
+    status, output = subprocess.getstatusoutput(gunicorn_cmd)
     print(">>> 启动服务 {} 于 {}:{} ".format(serv_name, HOST, PORT))
     print(">>> {}: subprocess status is: {}, output is: {}".format("SUCCESS" if status == 0 else "FAIL", status, output))
 
