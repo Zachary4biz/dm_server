@@ -68,6 +68,7 @@ def start_service(serv_name):
     --access-logfile {service_param.gunicorn_logfile} \
     --error-logfile {service_param.gunicorn_logfile+".opt"} \
     --worker-class gevent \
+    --daemon \
     2>&1 &
     """.strip()
     status, output = subprocess.getstatusoutput(gunicorn_cmd)
