@@ -47,7 +47,7 @@ class Logger(object):
 
         # set formater
         logging.Formatter.converter = self.beijing
-        formatstr = '|%(asctime)s| [%(levelname)s] [%(filename)s-%(lineno)d] %(message)s' if formatstr is None else formatstr
+        formatstr = '|%(asctime)s| [%(thread)d] [%(levelname)s] [%(filename)s-%(lineno)d] %(message)s' if formatstr is None else formatstr
         formatter = logging.Formatter(formatstr, "%Y-%m-%d %H:%M:%S")
 
         if log2console:
