@@ -10,7 +10,8 @@ profile: 8000
 """
 import os
 BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
-
+if not os.path.exists(BaseLogDir):
+    os.mkdir(BaseLogDir)
 
 class Params:
     def __init__(self, port, service_name, timeout=6, worker_num=2):
@@ -18,7 +19,9 @@ class Params:
         self.timeout = timeout
         self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
         self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
-        self.service_logfile = BaseLogDir + f"/{service_name}/{service_name}_service.log"
+        self.service_logfile = BaseLogDir + f"/{service_name}"+f"/{service_name}_service.log"
+        if not os.path.exists(BaseLogDir + f"/{service_name}"):
+            os.mkdir(BaseLogDir + f"/{service_name}")
         self.worker_num = worker_num
 
 
