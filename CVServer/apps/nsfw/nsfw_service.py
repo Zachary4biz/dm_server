@@ -10,7 +10,7 @@ import json
 import time
 import os
 os.environ['GLOG_minloglevel'] = '2'  # 控制caffe日志
-from config import CONFIG_NEW, use_lazy
+from config import CONFIG_NEW
 from util.logger import Logger
 from util import common_util
 from util.cv_util import CVUtil
