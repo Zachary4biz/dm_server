@@ -29,10 +29,10 @@ class Params:
 
 # 每个服务的参数
 CONFIG_NEW = {
-    'age': Params(port=9001, service_name="age", timeout=8),
-    'gender': Params(port=9002, service_name="gender", timeout=8),
-    'nsfw': Params(port=9003, service_name="nsfw", timeout=6),
-    'obj': Params(port=9004, service_name="obj", timeout=5),
+    'age': Params(port=9001, service_name="age", timeout=8, worker_num=4),
+    'gender': Params(port=9002, service_name="gender", timeout=8, worker_num=4),
+    'nsfw': Params(port=9003, service_name="nsfw", timeout=6, worker_num=4),
+    'obj': Params(port=9004, service_name="obj", timeout=5, worker_num=4),
     'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
 }
 
