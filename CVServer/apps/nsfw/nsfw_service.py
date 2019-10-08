@@ -33,7 +33,7 @@ def get_clf():
     global modelClassifier
     if modelClassifier is None:
         basePath = os.path.abspath(os.path.dirname(__file__))
-        get_logger().info(">>> loading clf (should be init)")
+        get_logger().info(">>> loading clf (should be init) at [pid]: {} [ppid]: {}".format(os.getpid(), os.getppid()))
         modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
                                             caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
     return modelClassifier

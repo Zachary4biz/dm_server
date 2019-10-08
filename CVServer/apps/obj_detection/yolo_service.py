@@ -34,7 +34,7 @@ yolo = None
 def get_clf():
     global yolo
     if yolo is None:
-        get_logger().info(">>> loading clf (should be init)")
+        get_logger().info(">>> loading clf (should be init) at [pid]: {} [ppid]: {}".format(os.getpid(), os.getppid()))
         params = YOLOModel._defaults.copy()
         params.update({"image": True})
         ##################################################################
