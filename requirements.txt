@@ -7,3 +7,5 @@ keras==2.2.5
 zac-pyutils>=1.59
 django==2.2.5
 timeout_decorator==0.4.1
+gunicorn==19.9.0
+gevent==1.4.0
