@@ -9,7 +9,7 @@ obj: 8004
 profile: 8000
 """
 import os
-BaseLogDir = os.path.abspath(__file__)+"/logs"
+BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
 
 
 class Params:
@@ -18,7 +18,7 @@ class Params:
         self.timeout = timeout
         self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
         self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
-        self.service_logfile = BaseLogDir + f"{service_name}/{service_name}_service.log"
+        self.service_logfile = BaseLogDir + f"/{service_name}/{service_name}_service.log"
         self.worker_num = worker_num
 
 
@@ -29,3 +29,11 @@ CONFIG_NEW = {
     'obj': Params(port=9004, service_name="obj", timeout=5),
     'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
 }
+
+if __name__ == '__main__':
+    print(CONFIG_NEW)
+    for k in CONFIG_NEW.keys():
+        print(">>> {}".format(k))
+        for i in dir(CONFIG_NEW[k]):
+            if not i.startswith("_"):
+                print("  ", i+"="+str(CONFIG_NEW[k].__getattribute__(i)))
