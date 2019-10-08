@@ -13,7 +13,7 @@ from apps.age import age_service
 from apps.gender import gender_service
 from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
-from config import *
+from config import CONFIG_NEW
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
@@ -91,7 +91,7 @@ def request_service_http_multiProcess(zipped_param):
 def request_service_http(service, inner_request):
     url, id_ = inner_request.GET['img_url'], inner_request.GET['id']
     begin = time.time()
-    request_url = "http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG[service.NAME]['port'], service.NAME, url, id_)
+    request_url = "http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service.NAME].port, service.NAME, url, id_)
     get_logger().debug(">>> service:{}, request_url:{}".format(service.NAME, request_url))
     try:
         res = requests.get(request_url, timeout=service.TIMEOUT).text

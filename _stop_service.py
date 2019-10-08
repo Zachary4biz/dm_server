@@ -5,11 +5,11 @@ import os
 import sys
 import subprocess
 sys.path.append(os.path.join(os.path.abspath("."), "CVServer"))
-from config import *
+from config import CONFIG_NEW
 
 
 def kill_service(service_name_inp):
-    port = CONFIG[service_name_inp]['port']
+    port = CONFIG_NEW[service_name_inp].port
     print("    -将kill服务:{} at port:{}".format(service_name_inp, port))
     status, output = subprocess.getstatusoutput(r"ps -ef | grep ':{}' | grep -v 'grep'".format(port))
     if status != 0:
@@ -29,7 +29,7 @@ def kill_service(service_name_inp):
 
 service_name = sys.argv[1]
 if service_name == "all":
-    for i in CONFIG.keys():
+    for i in CONFIG_NEW.keys():
         kill_service(i)
 else:
     kill_service(service_name)
