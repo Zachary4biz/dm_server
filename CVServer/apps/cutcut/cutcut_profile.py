@@ -7,7 +7,6 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__))+"/../../")
 import json
 import requests
-from util import config, common_util
 from util.logger import Logger
 from apps.age import age_service
 from apps.gender import gender_service
@@ -20,20 +19,21 @@ from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
 from multiprocessing import Pool
 import traceback
 
+
+NAME = "cutcut_profile"
+
 logger = None
-
-
 def get_logger():
     global logger
     if logger is None:
-        logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=config.CUTCUT_LOG_PATH, logfile_err="auto", loglevel2file=20).get_logger()
+        logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile, logfile_err="auto", loglevel2file=20).get_logger()
     return logger
 
 
 def request_kw(text, is_title=True):
     keywords = []  # default
     try:
-        res = requests.post(config.NLP.kw_port,
+        res = requests.post(CONFIG_NEW.NLP.kw_port,
                             data={"sentences": text, "isShortText": "1" if is_title else "0", "topn": 2})
         if res.status_code == 200 and len(res.text.strip()) > 0:
             keywords = [i.split(":") for i in res.text.strip().split("\t")]

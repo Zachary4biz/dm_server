@@ -13,6 +13,8 @@ BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
 if not os.path.exists(BaseLogDir):
     os.mkdir(BaseLogDir)
 
+
+# 每个服务的参数
 class Params:
     def __init__(self, port, service_name, timeout=6, worker_num=2):
         self.port = port
@@ -25,6 +27,7 @@ class Params:
         self.worker_num = worker_num
 
 
+# 每个服务的参数
 CONFIG_NEW = {
     'age': Params(port=9001, service_name="age", timeout=8),
     'gender': Params(port=9002, service_name="gender", timeout=8),
@@ -32,6 +35,15 @@ CONFIG_NEW = {
     'obj': Params(port=9004, service_name="obj", timeout=5),
     'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
 }
+
+
+# NLP服务的地址
+class NLP:
+    def __init__(self):
+        pass
+    tag_port = "http://newsprofile-keywords.internalapus.com/segment/tags.jsp"
+    kw_port = "http://newsprofile-keywords.internalapus.com/segment/keywords.jsp"
+
 
 if __name__ == '__main__':
     print(CONFIG_NEW)

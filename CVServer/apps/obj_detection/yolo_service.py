@@ -7,38 +7,34 @@ import sys
 sys.path.append(os.path.dirname(__file__)+"/../../")
 import json
 import time
+import os
+os.environ['GLOG_minloglevel'] = '2'
+from config import CONFIG_NEW
 from util.logger import Logger
-from util import config
 from util import common_util
 from util.cv_util import CVUtil
 import itertools
-
-logger = None
-
-
-def get_logger():
-    global logger
-    if logger is None:
-        logger = Logger('obj_service', log2console=False, log2file=True, logfile=config.YOLO_LOG_PATH).get_logger()
-    return logger
-
-
-#########
-# cv part
-#########
-import os
-os.environ['GLOG_minloglevel'] = '2'
 from .yolo import YOLOModel
 
 
-basePath = os.path.dirname(__file__)
+NAME = "obj"
 cvUtil = CVUtil()
+TIMEOUT = CONFIG_NEW[NAME].timeout
+
+
+logger = None
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger('obj_service', log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile).get_logger()
+    return logger
+
+
 yolo = None
-
-
 def get_clf():
     global yolo
     if yolo is None:
+        basePath = os.path.dirname(__file__)
         params = YOLOModel._defaults.copy()
         params.update({"image": True})
         ##################################################################
@@ -50,10 +46,6 @@ def get_clf():
                 assert os.path.exists(v), "no model-file found: {}".format(v)
         yolo = YOLOModel(**params)
     return yolo
-
-
-TIMEOUT = 5
-NAME = "obj"
 
 
 def _predict(img):
@@ -68,21 +60,10 @@ def _predict(img):
         return None, repr(e.message)
 
 
-# TestCase
-# imgURL = "http://news.cnhubei.com/xw/wuhan/201506/W020150615573270910887.jpg"
-# image = cvUtil.img_from_url_PIL(imgURL)
-# get_logger().info(">>>>>> img load")
-# pred_res = _predict(image)
-# get_logger().info(">>>>>> found classes: {}".format(pred_res))
-
-
 def get_default_res(info="default res"):
     return []
 
 
-#################
-# Django API part
-#################
 from django.http import HttpResponse
 
 param_check_list = ['img_url', 'id']
