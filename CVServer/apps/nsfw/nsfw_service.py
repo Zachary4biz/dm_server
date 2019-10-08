@@ -10,7 +10,7 @@ import json
 import time
 import os
 os.environ['GLOG_minloglevel'] = '2'  # 控制caffe日志
-from config import CONFIG_NEW
+from config import CONFIG_NEW, use_lazy
 from util.logger import Logger
 from util import common_util
 from util.cv_util import CVUtil
@@ -96,3 +96,9 @@ def predict(request):
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
+
+
+# 如果不使用懒加载就直接在此module里初始化
+if not CONFIG_NEW[NAME].use_lazy:
+    _ = get_clf()
+    _ = get_logger()

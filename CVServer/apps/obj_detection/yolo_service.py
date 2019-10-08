@@ -96,3 +96,9 @@ def predict(request):
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
 
 # get_logger().info(">>>> init finished") # 可以打开注释，用来检验django服务是否有重启？是否有多次初始化
+
+
+# 如果不使用懒加载就直接在此module里初始化
+if not CONFIG_NEW[NAME].use_lazy:
+    _ = get_clf()
+    _ = get_logger()
