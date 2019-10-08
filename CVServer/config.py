@@ -1,60 +1,31 @@
 # author: zac
 # create-time: 2019-09-16 10:40
-# usage: - 
+# usage: -
+"""
+age: 8001
+gender: 8002
+nsfw: 8003
+obj: 8004
+profile: 8000
+"""
 import os
-host_logfile = os.path.join(os.path.abspath("."), "logs/localhost_{}.log")
-gunicorn_logfile = os.path.join(os.path.abspath("."), "logs/gunicorn_{}.log")
+BaseLogDir = os.path.abspath(__file__)+"/logs"
 
 
 class Params:
-    def __init__(self, port_, host_logfile_, gunicorn_logfile_):
-        self.port = port_
-        self.host_logfile = host_logfile_
-        self.gunicorn_logfile = gunicorn_logfile_
+    def __init__(self, port, service_name, timeout=6, worker_num=2):
+        self.port = port
+        self.timeout = timeout
+        self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
+        self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
+        self.service_logfile = BaseLogDir + f"{service_name}/{service_name}_service.log"
+        self.worker_num = worker_num
 
 
 CONFIG_NEW = {
-    'age': Params(port_=9001,
-                  host_logfile_=host_logfile.format("age"),
-                  gunicorn_logfile_=gunicorn_logfile.format("age")),
-    'gender': Params(port_=9002,
-                     host_logfile_=host_logfile.format("gender"),
-                     gunicorn_logfile_=gunicorn_logfile.format("gender")),
-    'nsfw': Params(port_=9003,
-                   host_logfile_=host_logfile.format("nsfw"),
-                   gunicorn_logfile_=gunicorn_logfile.format("nsfw")),
-    'obj': Params(port_=9004,
-                  host_logfile_=host_logfile.format("obj"),
-                  gunicorn_logfile_=gunicorn_logfile.format("obj")),
-    'cutcut_profile': Params(port_=9000,
-                             host_logfile_=host_logfile.format("cutcut_profile"),
-                             gunicorn_logfile_=gunicorn_logfile.format("cutcut_profile")),
-}
-
-CONFIG = {
-    'age': {
-        "port": 8001,
-        "host_logfile": host_logfile.format("age"),
-        "gunicorn_logfile": gunicorn_logfile.format("age"),
-    },
-    'gender': {
-        "port": 8002,
-        "host_logfile": host_logfile.format("gender"),
-        "gunicorn_logfile": gunicorn_logfile.format("gender"),
-    },
-    'nsfw': {
-        "port": 8003,
-        "host_logfile": host_logfile.format("nsfw"),
-        "gunicorn_logfile": gunicorn_logfile.format("nsfw"),
-    },
-    'obj': {
-        "port": 8004,
-        "host_logfile": host_logfile.format("obj"),
-        "gunicorn_logfile": gunicorn_logfile.format("obj"),
-    },
-    'cutcut_profile': {
-        "port": 8000,
-        "host_logfile": host_logfile.format("cutcut_profile"),
-        "gunicorn_logfile": gunicorn_logfile.format("cutcut_profile"),
-    },
+    'age': Params(port=9001, service_name="age", timeout=8),
+    'gender': Params(port=9002, service_name="gender", timeout=8),
+    'nsfw': Params(port=9003, service_name="nsfw", timeout=6),
+    'obj': Params(port=9004, service_name="obj", timeout=5),
+    'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
 }
