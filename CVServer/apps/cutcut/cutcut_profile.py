@@ -195,7 +195,7 @@ def profile_direct_api(request):
         p = Pool(4)
         service_list_ = [nsfw_service, age_service, gender_service, yolo_service]
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list_]
-        url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG[ser['NAME']]['port'], ser['NAME'], img_url, id_) for ser in service_list]*len(service_list)
+        url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
         result = dict(zip([i['NAME'] for i in service_list], r))  # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
         p.close()
