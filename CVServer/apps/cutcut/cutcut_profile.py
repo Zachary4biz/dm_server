@@ -12,7 +12,7 @@ from apps.age import age_service
 from apps.gender import gender_service
 from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
-from config import CONFIG_NEW
+from config import CONFIG_NEW, NLP
 import time
 import timeout_decorator
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
@@ -33,7 +33,7 @@ def get_logger():
 def request_kw(text, is_title=True):
     keywords = []  # default
     try:
-        res = requests.post(CONFIG_NEW.NLP.kw_port,
+        res = requests.post(NLP.kw_port,
                             data={"sentences": text, "isShortText": "1" if is_title else "0", "topn": 2})
         if res.status_code == 200 and len(res.text.strip()) > 0:
             keywords = [i.split(":") for i in res.text.strip().split("\t")]
