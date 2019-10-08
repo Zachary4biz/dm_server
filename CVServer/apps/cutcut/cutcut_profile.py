@@ -205,7 +205,7 @@ def profile_direct_api(request):
             res, delta_t, is_success = v
             if is_success != "success":
                 # print(is_success)
-                get_logger().error("[SERVICE]:{} [ERR]:{}".format(k, is_success.split("\t")[0]))
+                get_logger().error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 get_logger().debug(is_success)
         nsfw_res, nsfw_time, nsfw_success = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
         age_res, age_time, age_success = result['age']

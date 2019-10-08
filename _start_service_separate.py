@@ -38,7 +38,8 @@ def test_service(serv_name):
         print(">>> 测试post服务(profile), 请求url: {}".format(url))
         b = time.time()
         res = requests.post(url=url, data=post_params, timeout=60).text 
-    print(">>> Test on {}: [time]:{} [res]:{}".format(serv_name, str(time.time() - b), res))
+    print(">>> Test on {}: [time]:{:.3f}ms [res]:{}".format(serv_name, (time.time() - b)*1000, res))
+    print("**上述计时包含了模型初始化时间**")
 
 
 def start_service(serv_name):

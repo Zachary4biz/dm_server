@@ -36,6 +36,7 @@ modelClassifier = None
 def get_clf():
     global modelClassifier
     if modelClassifier is None:
+        get_logger().info(">>> loading clf (should be init)")
         modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
                                             caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
     return modelClassifier
@@ -101,7 +102,7 @@ def predict(request):
                 res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
         get_logger().info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {}ms [elapsed-load img]: {}ms".format(params['id'], params['img_url'], json_str,
+            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {:.2f}ms [elapsed-load img]: {:.2f}ms".format(params['id'], params['img_url'], json_str,
                                                                        round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
