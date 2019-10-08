@@ -8,41 +8,16 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__))+"/../../")
 import json
 import time
+import os
+os.environ['GLOG_minloglevel'] = '2'
+from config import CONFIG_NEW
 from util.logger import Logger
-from util import config
 from util import common_util
 from util.cv_util import CVUtil
 
-logger = None
 
-
-def get_logger():
-    global logger
-    if logger is None:
-        logger = Logger('age_service', log2console=False, log2file=True, logfile=config.AGE_LOG_PATH).get_logger()
-    return logger
-
-#########
-# cv part
-#########
-import os
-os.environ['GLOG_minloglevel'] = '2'
-
-basePath = os.path.dirname(__file__)
-cvUtil = CVUtil()
-modelClassifier = None
-
-
-def get_clf():
-    global modelClassifier
-    if modelClassifier is None:
-        modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
-                                            caffemodel_fp=basePath + "/model/full_age.caffemodel")
-    return modelClassifier
-
-
-TIMEOUT = 8
 NAME = "age"
+TIMEOUT = CONFIG_NEW[NAME].timeout
 output = [
     '71+ years',
     '36 - 50 years',
@@ -52,6 +27,25 @@ output = [
     '16 - 25 years',
     '26 - 35 years'
 ]
+cvUtil = CVUtil()
+
+
+logger = None
+def get_logger():
+    global logger
+    if logger is None:
+        logger = Logger(loggername=NAME, log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile).get_logger()
+    return logger
+
+
+modelClassifier = None
+def get_clf():
+    global modelClassifier
+    if modelClassifier is None:
+        basePath = os.path.dirname(__file__)
+        modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
+                                            caffemodel_fp=basePath + "/model/full_age.caffemodel")
+    return modelClassifier
 
 
 def get_default_res(info="default res"):

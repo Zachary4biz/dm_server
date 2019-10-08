@@ -8,46 +8,35 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__))+"/../../")
 import json
 import time
+import os
+os.environ['GLOG_minloglevel'] = '2'
+from config import CONFIG_NEW
 from util.logger import Logger
-from util import config
-from util.common_util import timeit
+from util import common_util
 from util.cv_util import CVUtil
 
+NAME = "gender"
+TIMEOUT = CONFIG_NEW[NAME].timeout
+output = ['female', 'male']
+cvUtil = CVUtil()
+
+
 logger = None
-
-
 def get_logger():
     global logger
     if logger is None:
-        logger = Logger('gender_service', log2console=False, log2file=True, logfile=config.GENDER_LOG_PATH).get_logger()
+        logger = Logger(loggername=NAME, log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile).get_logger()
     return logger
 
-#########
-# cv part
-#########
-import sys
-import os
-os.environ['GLOG_minloglevel'] = '2'
 
-basePath = os.path.dirname(__file__)
-cvUtil = CVUtil()
 modelClassifier = None
-
-
 def get_clf():
     global modelClassifier
     if modelClassifier is None:
+        basePath = os.path.dirname(__file__)
         modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/gender_deploy_correct.prototxt",
                                             caffemodel_fp=basePath + "/model/gender_model_correct.caffemodel")
     return modelClassifier
-
-
-TIMEOUT = 8
-NAME = "gender"
-output = [
-    'female',
-    'male',
-]
 
 
 def get_default_res(info="default res"):
@@ -62,7 +51,7 @@ def _predict_face_caffe_img(face):
 
 
 def _predict(img):
-    face_list, delta_t = timeit(cvUtil.get_face_list, img)
+    face_list, delta_t = common_util.timeit(cvUtil.get_face_list, img)
     get_logger().debug("[elapsed-dlib face]:{}".format(delta_t))
     # face_list = cvUtil.get_face_list(img)
     if len(face_list) == 0:
@@ -93,7 +82,7 @@ def predict(request):
     begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):
-        img, delta_t = timeit(cvUtil.img_from_url_cv2, params['img_url'])
+        img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
         get_logger().debug("[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
             # 图片加载失败
