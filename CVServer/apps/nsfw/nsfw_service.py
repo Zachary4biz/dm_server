@@ -99,6 +99,6 @@ def predict(request):
 
 
 # 如果不使用懒加载就直接在此module里初始化
-if not CONFIG_NEW[NAME].use_lazy:
-    _ = get_clf()
-    _ = get_logger()
+# if not CONFIG_NEW[NAME].use_lazy:
+#     _ = get_clf()
+#     _ = get_logger()
