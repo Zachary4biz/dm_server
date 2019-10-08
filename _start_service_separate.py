@@ -67,7 +67,7 @@ def start_service(serv_name):
     -w {service_param.worker_num} \
     --access-logfile {service_param.gunicorn_logfile} \
     --error-logfile {service_param.gunicorn_logfile+".opt"} \
-    --worker-class gevent \
+    --worker-class eventlet \
     --daemon \
     2>&1 &
     """.strip()
