@@ -23,14 +23,16 @@ if not os.path.exists(BaseLogDir):
 # 每个服务的参数
 class Params:
     def __init__(self, port, service_name, timeout=6, worker_num=2, use_lazy=False):
-        self.port = port
-        self.timeout = timeout
+        # gunicorn启动server时（_start_service...）里会用到的参数
         self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
         self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
+        self.worker_num = worker_num
+        # profile及各子服务自身的参数
+        self.port = port
+        self.timeout = timeout
         self.service_logfile = BaseLogDir + f"/{service_name}"+f"/{service_name}_service.log"
         if not os.path.exists(BaseLogDir + f"/{service_name}"):
             os.mkdir(BaseLogDir + f"/{service_name}")
-        self.worker_num = worker_num
         # 是否使用懒加载初始化各个子服务？一般都不考虑使用懒加载，避免加载过程中来的请求全都超时了
         self.use_lazy = use_lazy
         self.logger = Logger(loggername=service_name, log2console=False, log2file=True, logfile=self.service_logfile).get_logger()
@@ -71,13 +73,24 @@ class ObjParams(Params):
 
 
 # 每个服务的参数
-CONFIG_NEW = {
-    'age': AgeParams(port=9001, service_name="age", timeout=6, worker_num=2),
-    'gender': GenderParams(port=9002, service_name="gender", timeout=6, worker_num=2),
-    'nsfw': NSFWParams(port=9003, service_name="nsfw", timeout=8, worker_num=4),
-    'obj': ObjParams(port=9004, service_name="obj", timeout=5, worker_num=3),
-    'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
-}
+if os.environ['SERVICE_NAME'] == "all":
+    CONFIG_NEW = {
+        'age': AgeParams(port=9000, service_name="age", timeout=6, worker_num=2),
+        'gender': GenderParams(port=9000, service_name="gender", timeout=6, worker_num=2),
+        'nsfw': NSFWParams(port=9000, service_name="nsfw", timeout=8, worker_num=4),
+        'obj': ObjParams(port=9000, service_name="obj", timeout=5, worker_num=3),
+        'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
+        'all': Params(port=9000, service_name="all"),
+    }
+else:
+    CONFIG_NEW = {
+        'age': AgeParams(port=9001, service_name="age", timeout=6, worker_num=2),
+        'gender': GenderParams(port=9002, service_name="gender", timeout=6, worker_num=2),
+        'nsfw': NSFWParams(port=9003, service_name="nsfw", timeout=8, worker_num=4),
+        'obj': ObjParams(port=9004, service_name="obj", timeout=5, worker_num=3),
+        'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
+    }
+
 
 
 # NLP服务的地址
