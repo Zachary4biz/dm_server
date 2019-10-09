@@ -5,6 +5,8 @@ import os
 import sys
 import subprocess
 sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../")))
+service_name = sys.argv[1]
+os.environ.setdefault("SERVICE_NAME", str(service_name))
 from config import CONFIG_NEW
 
 
@@ -27,7 +29,6 @@ def kill_service(service_name_inp):
             print(j)
 
 
-service_name = sys.argv[1]
 if service_name in ["all", "seq"]:
     for i in CONFIG_NEW.keys():
         kill_service(i)
