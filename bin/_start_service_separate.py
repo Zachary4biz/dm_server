@@ -5,22 +5,22 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../")))
+from zac_pyutils import ExqUtils
+##################################################################
+# **IMPORTANT*** 环境变量配置优先级最高，必须放在CONFIG_NEW模块引入之前
+# --service 指定开启哪个服务，默认为all --host 指定ip
+##################################################################
+args_dict = ExqUtils.parse_argv(sys.argv)
+SERVICE = args_dict['service']
+HOST = args_dict['host']
+os.environ.setdefault("SERVICE_NAME", str(SERVICE))  # urls.py config.py 里用到此环境变量
+os.environ.setdefault("SERVICE_HOST", str(HOST))  # cutcut_profile.py 用到此环境变量（用于请求子服务）
+
 import time
 import requests
 import subprocess
 import datetime
-from zac_pyutils import ExqUtils
 from config import CONFIG_NEW
-
-if sys.argv[1] == "-h" or sys.argv[1] == "--help":
-    print("--service 指定开启哪个服务，默认为all")
-    print("--host 指定ip")
-
-args_dict = ExqUtils.parse_argv(sys.argv)
-SERVICE = args_dict['service']
-HOST = args_dict['host']
-os.environ.setdefault("SERVICE_NAME", str(SERVICE))  # urls.py 里用到此环境变量
-os.environ.setdefault("SERVICE_HOST", str(HOST))  # cutcut_profile.py 用到此环境变量（用于请求子服务）
 
 
 def test_service(serv_name):
