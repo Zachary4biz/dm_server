@@ -43,23 +43,22 @@ from apps.cutcut import cutcut_profile
 #             get_all_url(item.urlconf_name, prev + v)
 #     return result
 
-urlpattern_dicts = {
-    "all": [url(r'hello_post', basic_view.hello_post),
-            url(r'age', age_service.predict),
-            url(r'gender', gender_service.predict),
-            url(r'nsfw', nsfw_service.predict),
-            url(r'obj', yolo_service.predict),
-            url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
-            url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))],
-    "age": [url(r'age', age_service.predict)],
-    "gender": [url(r'gender', gender_service.predict)],
-    "nsfw": [url(r'nsfw', nsfw_service.predict)],
-    "obj": [url(r'obj', yolo_service.predict)],
-    "cutcut_profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
-                       url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
-}
+all_service_api_dict = {"age": [url(r'age', age_service.predict)],
+                        "gender": [url(r'gender', gender_service.predict)],
+                        "nsfw": [url(r'nsfw', nsfw_service.predict)],
+                        "obj": [url(r'obj', yolo_service.predict)],
+                        "cutcut_profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+                                           url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
+                        }
 
-urlpatterns = urlpattern_dicts[os.environ['SERVICE_NAME']]
+urlpatterns = []
+if os.environ['SERVICE_NAME'] == "all":
+    urlpatterns.extend(url(r'hello_post', basic_view.hello_post))
+    for i in all_service_api_dict.values():
+        urlpatterns.extend(i)
+else:
+    urlpatterns.extend(all_service_api_dict[os.environ['SERVICE_NAME']])
+
 
 # urlpatterns = [
 #     url(r'^admin', admin.site.urls),

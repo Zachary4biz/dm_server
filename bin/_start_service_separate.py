@@ -19,6 +19,8 @@ if sys.argv[1] == "-h" or sys.argv[1] == "--help":
 args_dict = ExqUtils.parse_argv(sys.argv)
 SERVICE = args_dict['service']
 HOST = args_dict['host']
+os.environ.setdefault("SERVICE_NAME", str(SERVICE))  # urls.py 里用到此环境变量
+os.environ.setdefault("SERVICE_HOST", str(HOST))  # cutcut_profile.py 用到此环境变量（用于请求子服务）
 
 
 def test_service(serv_name):
@@ -29,8 +31,11 @@ def test_service(serv_name):
         'title': 'FM明星大片',
         'description': 'Rihanna以唐朝风发髻和妆容登上中国版BAZAAR 8月上封面，日日不愧是“山东人，扮起唐装一点也不违和😁'
     }
-    url = "http://{host}:{port}/{service}".format(host=HOST, port=PORT, service=serv_name)
-    if serv_name != "cutcut_profile":
+    url = f"http://{HOST}:{PORT}/{serv_name}"
+    if serv_name == "all":
+        # 如果是all不用发起任何请求
+        pass
+    elif serv_name != "cutcut_profile":
         url = url+"?img_url={}&id={}".format(post_params['img_url'], post_params['id'])
         print(">>> 测试get服务, 将请求url: {}".format(url))
         b = time.time()
@@ -57,10 +62,6 @@ def start_service(serv_name):
         print("日志目录不存在，新建: {}".format(os.path.dirname(LOGFILE)))
         os.mkdir(os.path.dirname(LOGFILE))
 
-    os.environ.setdefault("SERVICE_NAME", serv_name)  # urls.py 里用到此环境变量
-    os.environ.setdefault("SERVICE_HOST", str(HOST))  # cutcut_profile.py 用到此环境变量（用于请求子服务）
-    os.environ.setdefault("SERVICE_PORT", str(PORT))  # 同上
-    # status, output = subprocess.getstatusoutput('nohup python -u manage_cutcut_server.py runserver {}:{} > {} 2>&1 &'.format(HOST, PORT, LOGFILE))
     # gunicorn 启动
     gunicorn_cmd = f"""
     nohup gunicorn CVServer.wsgi:application \
@@ -80,10 +81,12 @@ def start_service(serv_name):
 
 
 if SERVICE == "all":
-    print("分别启动所有服务")
-    assert False, "使用starts.sh里循环bash启动所有 | 不支持一个py内部起多个django服务，会导致environ冲突（属于同一个py进程，共用environ）"
+    print("在同一端口下不同路由启动所有服务")
+    # assert False, "使用starts.sh里循环bash启动所有 | 不支持一个py内部起多个django服务，会导致environ冲突（属于同一个py进程，共用environ）"
+    start_service(SERVICE)
+    time.sleep(10)
     for i in CONFIG_NEW.keys():
-        start_service(i)
+        test_service(i)
 else:
     start_service(SERVICE)
     time.sleep(10)

@@ -28,7 +28,7 @@ def kill_service(service_name_inp):
 
 
 service_name = sys.argv[1]
-if service_name == "all":
+if service_name in ["all", "seq"]:
     for i in CONFIG_NEW.keys():
         kill_service(i)
 else:
