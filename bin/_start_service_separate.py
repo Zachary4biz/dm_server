@@ -34,7 +34,8 @@ def test_service(serv_name):
     url = f"http://{HOST}:{PORT}/{serv_name}"
     if serv_name == "all":
         # 如果是all不用发起任何请求
-        pass
+        b = time.time()
+        res = ""
     elif serv_name != "cutcut_profile":
         url = url+"?img_url={}&id={}".format(post_params['img_url'], post_params['id'])
         print(">>> 测试get服务, 将请求url: {}".format(url))
