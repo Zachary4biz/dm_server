@@ -71,6 +71,7 @@ def start_service(serv_name):
     --timeout 200 \
     --worker-class eventlet \
     --daemon \
+    --chdir {os.path.join(os.path.dirname(__file__), "..")} \
     2>&1 &
     """.strip()
     status, output = subprocess.getstatusoutput(gunicorn_cmd)
