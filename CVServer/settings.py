@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gunicorn',  # 正式部署
+    'age.apps.Config'
 ]
 
 MIDDLEWARE = [

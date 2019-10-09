@@ -15,18 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from django.contrib import admin
-from django.http import HttpResponse
 # from django.urls.resolvers import RegexURLPattern
 from django.views.decorators.csrf import csrf_exempt
-from . import basic_view
-from .apps.age import age_service
-from .apps.gender import gender_service
-from .apps.nsfw import nsfw_service
-from .apps.obj_detection import yolo_service
-from .apps.cutcut import cutcut_profile
 import os
-import json
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../")))
+import basic_view
+from apps.age import age_service
+from apps.gender import gender_service
+from apps.nsfw import nsfw_service
+from apps.obj_detection import yolo_service
+from apps.cutcut import cutcut_profile
 
 # django2 没有RegexURLPattern这个类了，暂时没解决，取消获取所有url的接口
 # def api_index(request):
@@ -46,12 +45,12 @@ import json
 
 urlpattern_dicts = {
     "all": [url(r'hello_post', basic_view.hello_post),
-                   url(r'age', age_service.predict),
-                   url(r'gender', gender_service.predict),
-                   url(r'nsfw', nsfw_service.predict),
-                   url(r'obj', yolo_service.predict),
-                   url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
-                   url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))],
+            url(r'age', age_service.predict),
+            url(r'gender', gender_service.predict),
+            url(r'nsfw', nsfw_service.predict),
+            url(r'obj', yolo_service.predict),
+            url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
+            url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))],
     "age": [url(r'age', age_service.predict)],
     "gender": [url(r'gender', gender_service.predict)],
     "nsfw": [url(r'nsfw', nsfw_service.predict)],

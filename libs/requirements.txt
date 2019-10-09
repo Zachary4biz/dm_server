@@ -1,0 +1,11 @@
+dlib==19.17.0
+numpy==1.16.4
+opencv-python>=4.1.0.25
+requests==2.22.0
+tensorflow==1.14.0
+keras==2.2.5
+zac-pyutils>=1.59
+django==2.2.5
+timeout_decorator==0.4.1
+gunicorn==19.9.0
+eventlet==0.25.1
