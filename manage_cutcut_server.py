@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
-import requests
 
 if __name__ == "__main__":
-    serv_name = os.environ['SERVICE_NAME']
-    HOST = os.environ['SERVICE_HOST']
-    PORT = os.environ['SERVICE_PORT']
-    print("serv_name:{} HOST:{} PORT:{}".format(serv_name,HOST,PORT))
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "CVServer.settings")
     try:
         from django.core.management import execute_from_command_line
