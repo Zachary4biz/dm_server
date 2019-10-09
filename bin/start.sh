@@ -30,9 +30,9 @@ if [[ ${service_name} = "seq" ]]; then
     done
 elif [[ ${service_name} = "all" ]]; then
     echo "执行 all| step1: 先在一个server上启动所有子服务: "
-    python -u _start_service_separate.py --service ${service} --host ${localIP}
+    python -u _start_service_separate.py --service ${service_name} --host ${localIP}
     echo "执行 all| step2: 单独开启一个profile服务: "
-    python -u _start_service_separate.py --service "cutcut_profile" --host ${localIP}
+    python -u _start_service_separate.py --service cutcut_profile --host ${localIP}
 else
     python -u _start_service_separate.py --service ${service_name} --host ${localIP}
 fi
