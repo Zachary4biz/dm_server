@@ -10,8 +10,11 @@ from PIL import Image
 from io import BytesIO
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-import caffe
-import dlib
+try:
+    import caffe
+    import dlib
+except Exception as e:
+    print(e)
 
 
 
