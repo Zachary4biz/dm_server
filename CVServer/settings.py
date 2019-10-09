@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-
+import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # server目录
 
-
+sys.path.append(os.path.join(BASE_DIR))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gunicorn',  # 正式部署
-    'age.apps.Config'
 ]
 
 MIDDLEWARE = [
@@ -120,3 +119,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+##############################
+# 根据要起的服务加载算法模型
+##############################
+from config import CONFIG_NEW
+SERVICE_NAME = os.environ['SERVICE_NAME']
+ALGO_MODEL = CONFIG_NEW[SERVICE_NAME].load_model()

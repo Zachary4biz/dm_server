@@ -14,7 +14,7 @@ from config import CONFIG_NEW
 from util.logger import Logger
 from util import common_util
 from util.cv_util import CVUtil
-from apps.age.apps import nsfw_model
+from django.conf import settings
 
 NAME = "age"
 TIMEOUT = CONFIG_NEW[NAME].timeout
@@ -38,15 +38,15 @@ def get_logger():
     return logger
 
 
-modelClassifier = nsfw_model
-def get_clf():
-    global modelClassifier
+modelClassifier = settings.ALGO_MODEL
+# def get_clf():
+#     global modelClassifier
     # if modelClassifier is None:
     #     basePath = os.path.dirname(__file__)
     #     get_logger().info(">>> loading clf (should be init) at [pid]: {} [ppid]: {}".format(os.getpid(), os.getppid()))
     #     modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
     #                                         caffemodel_fp=basePath + "/model/full_age.caffemodel")
-    return modelClassifier
+    # return modelClassifier
 
 
 def get_default_res(info="default res"):
@@ -55,7 +55,7 @@ def get_default_res(info="default res"):
 
 # 专用于predict切分人脸后的图像(caffe io下的格式)
 def _predict_face_caffe_img(face):
-    pred = get_clf().predict(face)[0]
+    pred = modelClassifier.predict(face)[0]
     confidence = round(float(pred[pred.argmax()]), 4)
     return {"id": int(pred.argmax()), "prob": confidence}
 
@@ -121,8 +121,3 @@ def predict(request):
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
 
-
-# 如果不使用懒加载就直接在此module里初始化
-# if not CONFIG_NEW[NAME].use_lazy:
-#     _ = get_clf()
-#     _ = get_logger()
