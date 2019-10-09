@@ -76,7 +76,7 @@ def request_service_http_multiProcess(zipped_param):
     except Exception as e:
         is_success = str(repr(e)) + "\t" + traceback.format_exc()
         res = ser_default
-    delta_t = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
+    delta_t = round(time.time() - begin, 5) * 1000
     return res, delta_t, is_success
 
 
@@ -213,14 +213,9 @@ def profile_direct_api(request):
         final_status = "success" if all(i == "success" for i in [nsfw_success, age_success, gender_success, yolo_success]) else "fail"
         res_dict.update({"status": final_status})
         res_jsonstr = json.dumps(res_dict)
-        total_time = "{:.2f}ms".format(round(time.time() - begin, 5) * 1000)
-        logger.info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: total:{} = nsfw:{} + age:{} + gender:{} + yolo:{} ".format(id_, img_url,
-                                                                                                                     res_jsonstr,
-                                                                                                                     total_time,
-                                                                                                                     nsfw_time,
-                                                                                                                     age_time,
-                                                                                                                     gender_time, yolo_time))
+        total_time = round(time.time() - begin, 5) * 1000
+        logger.info(f"[id]: {id_} [img_url]: {img_url} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = nsfw:{nsfw_time:.2f}ms + age:{age_time:.2f}ms + gender:{gender_time:.2f}ms + yolo:{yolo_time:.2f}ms ")
+
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
     else:

@@ -76,9 +76,12 @@ def predict(request):
             else:
                 res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
-        logger.info(
-            u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {:.2f}ms [elapsed-load img]: {:.2f}ms".format(params['id'], params['img_url'], json_str,
-                                                                       round(time.time() - begin, 5) * 1000, delta_t))
+
+        total_delta = round(time.time() - begin, 5) * 1000
+        logger.info(f"[id]: {params['id']} [img_url]: {params['img_url']} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
+        if total_delta > TIMEOUT * 1000:
+            logger.error(f"[TIMEOUT] [id]: {params['id']} [img_url]: {params['img_url']} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
+
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)

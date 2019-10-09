@@ -28,7 +28,7 @@ class Logger(object):
     def __init__(self, loggername,
                  loglevel2console=DEFAULT_LOGGING_LEVEL,
                  loglevel2file=DEFAULT_LOGGING_LEVEL,
-                 log2console=True, log2file=False, logfile=None, logfile_err=None, formatstr=None):
+                 log2console=True, log2file=False, logfile=None, logfile_err="auto", formatstr=None):
         """Logger initialization
         Args:
             loggername: Logger name, the same name gets the same logger instance
