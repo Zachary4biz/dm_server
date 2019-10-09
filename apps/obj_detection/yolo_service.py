@@ -20,8 +20,8 @@ from django.conf import settings
 NAME = "obj"
 cvUtil = CVUtil()
 TIMEOUT = CONFIG_NEW[NAME].timeout
-logger = settings.LOGGER
-modelClassifier = settings.ALGO_MODEL
+logger = settings.LOGGER[NAME]
+modelClassifier = settings.ALGO_MODEL[NAME]
 
 
 def _predict(img):

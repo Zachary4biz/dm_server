@@ -21,7 +21,7 @@ import traceback
 from django.conf import settings
 
 NAME = "cutcut_profile"
-logger = settings.LOGGER
+logger = settings.LOGGER[NAME]
 
 
 def request_kw(text, is_title=True):
@@ -59,7 +59,9 @@ from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 
 param_check_list = ['img_url', 'id', 'title', 'description']
+SERVICE_NAME = os.environ.get("SERVICE_NAME")
 HOST = os.environ.get("SERVICE_HOST")
+PORT = os.environ.get("SERVICE_PORT")
 
 
 # 为了用multiprocessing，需要避免用到module（不能pickle），所以把service用到的属性取出来作为字典
@@ -187,7 +189,12 @@ def profile_direct_api(request):
         p = Pool(4)
         service_list_ = [nsfw_service, age_service, gender_service, yolo_service]
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list_]
-        url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
+        if SERVICE_NAME == "all":
+            # 如果是以all启动的，所有服务都在一个端口（一个server）下
+            url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, PORT, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
+        else:
+            # 非all启动，则各自为独立server，使用独立的端口需要单独获取
+            url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
         result = dict(zip([i['NAME'] for i in service_list], r))  # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
         p.close()

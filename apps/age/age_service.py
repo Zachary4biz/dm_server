@@ -28,8 +28,8 @@ output = [
     '26 - 35 years'
 ]
 cvUtil = CVUtil()
-logger = settings.LOGGER
-modelClassifier = settings.ALGO_MODEL
+logger = settings.LOGGER[NAME]
+modelClassifier = settings.ALGO_MODEL[NAME]
 
 
 def get_default_res(info="default res"):
