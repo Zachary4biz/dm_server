@@ -14,29 +14,15 @@ from config import CONFIG_NEW
 from util.logger import Logger
 from util import common_util
 from util.cv_util import CVUtil
+from django.conf import settings
 
 
 NAME = "nsfw"
 TIMEOUT = CONFIG_NEW[NAME].timeout
 output = ['normal pic', 'nsfw pic']
 cvUtil = CVUtil()
-
-logger = None
-def get_logger():
-    global logger
-    if logger is None:
-        logger = Logger(loggername=NAME, log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile).get_logger()
-    return logger
-
-modelClassifier = None
-def get_clf():
-    global modelClassifier
-    if modelClassifier is None:
-        basePath = os.path.abspath(os.path.dirname(__file__))
-        get_logger().info(">>> loading clf (should be init) at [pid]: {} [ppid]: {}".format(os.getpid(), os.getppid()))
-        modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/nsfw_deploy.prototxt",
-                                            caffemodel_fp=basePath + "/model/resnet_50_1by2_nsfw.caffemodel")
-    return modelClassifier
+logger = settings.LOGGER
+modelClassifier = settings.ALGO_MODEL
 
 
 def get_default_res(info="default res"):
@@ -46,11 +32,11 @@ def get_default_res(info="default res"):
 def _predict(img):
     try:
         img_pro = cvUtil.pre_cv2caffe(img)
-        pred = get_clf().predict(img_pro)[0]
+        pred = modelClassifier.predict(img_pro)[0]
         confidence = round(float(pred[pred.argmax()]), 4)
         return {"id": int(pred.argmax()), "prob": confidence}, "success"
     except Exception as e:
-        get_logger().error(e)
+        logger.error(e)
         return None, repr(e.message)
 
 
@@ -79,9 +65,9 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
-        get_logger().debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
+        logger.debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
         if img is None:
-            get_logger().error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
+            logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
         else:
             res, remark = _predict(img)
@@ -90,7 +76,7 @@ def predict(request):
             else:
                 res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
-        get_logger().info(
+        logger.info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed]: {:.2f}ms [elapsed-load img]: {:.2f}ms".format(params['id'], params['img_url'], json_str,
                                                                        round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
@@ -98,7 +84,3 @@ def predict(request):
         return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
 
 
-# 如果不使用懒加载就直接在此module里初始化
-# if not CONFIG_NEW[NAME].use_lazy:
-#     _ = get_clf()
-#     _ = get_logger()
