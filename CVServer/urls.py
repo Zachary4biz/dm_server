@@ -54,6 +54,7 @@ all_service_api_dict = {"age": [url(r'age', age_service.predict)],
 urlpatterns = []
 if os.environ['SERVICE_NAME'] == "all":
     urlpatterns.extend([url(r'hello_post', basic_view.hello_post)])
+    all_service_api_dict.pop("cutcut_profile")  # all只启动子服务不包括profile
     for i in all_service_api_dict.values():
         urlpatterns.extend(i)
 else:

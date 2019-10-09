@@ -87,7 +87,10 @@ if SERVICE == "all":
     start_service(SERVICE)
     time.sleep(10)
     for i in CONFIG_NEW.keys():
-        test_service(i)
+        if i not in ["all", "cutcut_profile"]:
+            # all里面只启动子服务所以profile不请求
+            # all本身没有这个接口也不请求
+            test_service(i)
 else:
     start_service(SERVICE)
     time.sleep(10)

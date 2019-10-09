@@ -127,13 +127,29 @@ from config import CONFIG_NEW
 SERVICE_NAME = os.environ['SERVICE_NAME']
 ALGO_MODEL = {}
 LOGGER = {}
-if SERVICE_NAME == "all":
-    # 如果是一个server启了所有服务（同一端口不同路由），直接初始化所有模型和logger
-    for name, params in CONFIG_NEW.items():
+for name, params in CONFIG_NEW.items():
+    if SERVICE_NAME == "all":
+        # 如果是一个server启了所有服务（同一端口不同路由），直接初始化所有模型和logger
         ALGO_MODEL.update({name: params.load_model()})
         LOGGER.update({name: params.logger})
-else:
-    # 如果这个server只启动了某个服务，则只加载该服务的模型和logger
-    ALGO_MODEL.update({SERVICE_NAME: CONFIG_NEW[SERVICE_NAME].load_model()})
-    LOGGER.update({SERVICE_NAME: CONFIG_NEW[SERVICE_NAME].logger})
+    else:
+        if name == SERVICE_NAME:
+            # 如果这个server只启动了某个服务，则只加载该服务的模型和logger
+            ALGO_MODEL.update({name: params.load_model()})
+            LOGGER.update({name: params.logger})
+        else:
+            # 注意其他服务的也不能为空，因为在urls.py里使用了字典预先引入了各子服务的service模块
+            # 如果为空会导致该service模块无法正常初始化（KeyError）
+            ALGO_MODEL.update({name: None})
+            LOGGER.update({name: None})
+#
+# if SERVICE_NAME == "all":
+#     # 如果是一个server启了所有服务（同一端口不同路由），直接初始化所有模型和logger
+#     for name, params in CONFIG_NEW.items():
+#         ALGO_MODEL.update({name: params.load_model()})
+#         LOGGER.update({name: params.logger})
+# else:
+#     # 如果这个server只启动了某个服务，则只加载该服务的模型和logger
+#     ALGO_MODEL.update({SERVICE_NAME: CONFIG_NEW[SERVICE_NAME].load_model()})
+#     LOGGER.update({SERVICE_NAME: CONFIG_NEW[SERVICE_NAME].logger})
 
