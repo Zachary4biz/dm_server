@@ -30,23 +30,8 @@ output = [
 cvUtil = CVUtil()
 
 
-logger = None
-def get_logger():
-    global logger
-    if logger is None:
-        logger = Logger(loggername=NAME, log2console=False, log2file=True, logfile=CONFIG_NEW[NAME].service_logfile).get_logger()
-    return logger
-
-
+logger = settings.LOGGER
 modelClassifier = settings.ALGO_MODEL
-# def get_clf():
-#     global modelClassifier
-    # if modelClassifier is None:
-    #     basePath = os.path.dirname(__file__)
-    #     get_logger().info(">>> loading clf (should be init) at [pid]: {} [ppid]: {}".format(os.getpid(), os.getppid()))
-    #     modelClassifier = cvUtil.load_model(prototxt_fp=basePath + "/model/full_age.prototxt",
-    #                                         caffemodel_fp=basePath + "/model/full_age.caffemodel")
-    # return modelClassifier
 
 
 def get_default_res(info="default res"):
@@ -62,7 +47,7 @@ def _predict_face_caffe_img(face):
 
 def _predict(img):
     face_list, delta_t = common_util.timeit(cvUtil.get_face_list, img)
-    get_logger().debug("[elapsed-dlib face]:{}".format(delta_t))
+    logger.debug("[elapsed-dlib face]:{}".format(delta_t))
     if len(face_list) == 0:
         return None, "no frontal-face detected."
     else:
@@ -101,20 +86,20 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
-        get_logger().debug("[elapsed-load img]: {}  [url]: {}".format(params['img_url'], delta_t))
+        logger.debug("[elapsed-load img]: {}  [url]: {}".format(params['img_url'], delta_t))
         if img is None:
             json_str = json.dumps({"result": get_default_res(info='load image fail')})
-            get_logger().error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['img_url']))
+            logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], params['img_url']))
         else:
             (res_list, remark) = _predict(img)
             if res_list is None:
                 json_str = json.dumps({"result": get_default_res(info=remark)})
-                get_logger().warn("at [id]: {} [res]: {} [remark]: {}".format(params['id'], json_str, remark))
+                logger.warn("at [id]: {} [res]: {} [remark]: {}".format(params['id'], json_str, remark))
             else:
                 [d.update({"info": output[d['id']]}) for d in res_list]
                 json_str = json.dumps({"result": res_list})
-                get_logger().info("at [id]: {} [res]: {}".format(params['id'], json_str))
-        get_logger().info(
+                logger.info("at [id]: {} [res]: {}".format(params['id'], json_str))
+        logger.info(
             u"[id]: {} [img_url]: {} [res]: {} [elapsed-total]: {}ms [elapsed-load img]: {}ms".format(params['id'], params['img_url'], json_str,
                                                                        round(time.time() - begin, 5) * 1000, delta_t))
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")

@@ -33,16 +33,14 @@ class Params:
         self.worker_num = worker_num
         # 是否使用懒加载初始化各个子服务？一般都不考虑使用懒加载，避免加载过程中来的请求全都超时了
         self.use_lazy = use_lazy
+        self.logger = Logger(loggername=service_name, log2console=False, log2file=True, logfile=self.service_logfile).get_logger()
 
     def load_model(self):
         pass
 
 
 class AgeParams(Params):
-    logger = Logger(loggername="config-AgeParams", log2console=False, log2file=True, logfile="AgeParams.log").get_logger()
-
     def load_model(self):
-        self.logger.info(">>> init age model. [pid]:{} [ppid]:{}".format(os.getpid(), os.getppid()))
         print(">>> init age model. [pid]:{} [ppid]:{}".format(os.getpid(), os.getppid()))
         return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/age/model/full_age.prototxt"),
                                  caffemodel_fp=os.path.join(BaseDir, "apps/age/model/full_age.caffemodel"))

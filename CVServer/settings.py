@@ -126,3 +126,4 @@ STATIC_URL = '/static/'
 from config import CONFIG_NEW
 SERVICE_NAME = os.environ['SERVICE_NAME']
 ALGO_MODEL = CONFIG_NEW[SERVICE_NAME].load_model()
+LOGGER = CONFIG_NEW[SERVICE_NAME].logger
