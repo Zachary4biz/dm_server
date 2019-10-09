@@ -42,7 +42,8 @@ class AgeParams(Params):
     logger = Logger(loggername="config-AgeParams", log2console=False, log2file=True, logfile="AgeParams.log").get_logger()
 
     def load_model(self):
-        self.logger.info(">>> init age model")
+        self.logger.info(">>> init age model. [pid]:{} [ppid]:{}".format(os.getpid(), os.getppid()))
+        print(">>> init age model. [pid]:{} [ppid]:{}".format(os.getpid(), os.getppid()))
         return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/age/model/full_age.prototxt"),
                                  caffemodel_fp=os.path.join(BaseDir, "apps/age/model/full_age.caffemodel"))
 

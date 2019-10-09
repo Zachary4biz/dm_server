@@ -20,7 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../")))
-import basic_view
+from CVServer import basic_view
 from apps.age import age_service
 from apps.gender import gender_service
 from apps.nsfw import nsfw_service
