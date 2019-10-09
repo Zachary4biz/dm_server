@@ -50,14 +50,14 @@ class AgeParams(Params):
 
 class GenderParams(Params):
     def load_model(self):
-        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/age/model/gender_deploy_correct.prototxt"),
-                                 caffemodel_fp=os.path.join(BaseDir, "apps/age/model/gender_model_correct.caffemodel"))
+        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/gender/model/gender_deploy_correct.prototxt"),
+                                 caffemodel_fp=os.path.join(BaseDir, "apps/gender/model/gender_model_correct.caffemodel"))
 
 
 class NSFWParams(Params):
     def load_model(self):
-        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/age/model/nsfw_deploy.prototxt"),
-                                 caffemodel_fp=os.path.join(BaseDir, "apps/age/model/resnet_50_1by2_nsfw.caffemodel"))
+        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/nsfw/model/nsfw_deploy.prototxt"),
+                                 caffemodel_fp=os.path.join(BaseDir, "apps/nsfw/model/resnet_50_1by2_nsfw.caffemodel"))
 
 
 class ObjParams(Params):
