@@ -84,10 +84,10 @@ if os.environ['SERVICE_NAME'] == "all":
     }
 else:
     CONFIG_NEW = {
-        'age': AgeParams(port=9001, service_name="age", timeout=6, worker_num=2),
-        'gender': GenderParams(port=9002, service_name="gender", timeout=6, worker_num=2),
+        'age': AgeParams(port=9001, service_name="age", timeout=6, worker_num=4),
+        'gender': GenderParams(port=9002, service_name="gender", timeout=6, worker_num=4),
         'nsfw': NSFWParams(port=9003, service_name="nsfw", timeout=8, worker_num=4),
-        'obj': ObjParams(port=9004, service_name="obj", timeout=5, worker_num=3),
+        'obj': ObjParams(port=9004, service_name="obj", timeout=5, worker_num=4),
         'cutcut_profile': Params(port=9000, service_name="cutcut_profile"),
     }
 
