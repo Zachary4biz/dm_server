@@ -15,10 +15,18 @@ if [[ ! -n "${service_name}" ]]; then
     echo " cutcut_profile  |8000|         关闭 [画像总成] 服务"
     exit 1
 else
-    echo "将kill服务: ${service_name}"
+    if [[ ${service_name} = "all" ]]; then
+        for service in "age" "gender" "nsfw" "obj" "cutcut_profile"
+        do
+            echo "将kill服务: ${service}"
+            python -u _stop_service.py ${service}
+        done
+    else
+        echo "将kill服务: ${service_name}"
+        python -u _stop_service.py ${service_name}
+    fi
 fi
 
-python -u _stop_service.py ${service_name}
 
 echo "remaining as follow:"
 ps -ef | grep "cutcut"
