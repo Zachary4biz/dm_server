@@ -29,10 +29,15 @@ if [[ ${service_name} = "seq" ]]; then
         python -u _start_service_separate.py --service ${service} --host ${localIP}
     done
 elif [[ ${service_name} = "all" ]]; then
-    echo "执行 all| step1: 先在一个server上启动所有子服务: "
-    python -u _start_service_separate.py --service ${service_name} --host ${localIP}
-    echo "执行 all| step2: 单独开启一个profile服务: "
-    python -u _start_service_separate.py --service cutcut_profile --host ${localIP}
+    echo "*** all方式废弃 ***"
+    echo "实现上为了兼容会非常冗杂，需要手动更改配置文件或者传入指定的配置文件"
+    echo "并且性能上还会有下降，一个server多个接口也不能并发执行"
+    echo "例如子服务的server上有四个子服务，gunicorn只给了2个worker，那么profile的server每次基本只有两个请求能成功"
+    exit 0
+#    echo "执行 all| step1: 先在一个server上启动所有子服务: "
+#    python -u _start_service_separate.py --service ${service_name} --host ${localIP}
+#    echo "执行 all| step2: 单独开启一个profile服务: "
+#    python -u _start_service_separate.py --service cutcut_profile --host ${localIP}
 else
     python -u _start_service_separate.py --service ${service_name} --host ${localIP}
 fi

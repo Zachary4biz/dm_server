@@ -49,7 +49,7 @@ def test_service(serv_name):
     print("**上述计时包含了模型初始化时间**")
 
 
-def start_service(serv_name):
+def start_server(serv_name):
     service_param = CONFIG_NEW[serv_name]
     PORT = service_param.port
     LOGFILE = service_param.host_logfile
@@ -82,17 +82,17 @@ def start_service(serv_name):
 
 
 if SERVICE == "all":
-    print("在同一端口下不同路由启动所有「子服务」（profile由start.sh另起一个server/端口）")
+    assert False, "此部分逻辑已废弃"
+    print("在同一端口下不同路由启动所有「子服务」")
     # assert False, "使用starts.sh里循环bash启动所有 | 不支持一个py内部起多个django服务，会导致environ冲突（属于同一个py进程，共用environ）"
-    start_service(SERVICE)
+    start_server(SERVICE)
     time.sleep(10)
     for i in CONFIG_NEW.keys():
-        if i not in ["all", "cutcut_profile"]:
-            # all里面只启动子服务所以profile不请求
+        if i not in ["all"]:
             # all本身没有这个接口也不请求
             test_service(i)
 else:
-    start_service(SERVICE)
+    start_server(SERVICE)
     time.sleep(10)
     test_service(SERVICE)
 
