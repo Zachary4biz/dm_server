@@ -15,7 +15,7 @@ from util.logger import Logger
 from util import common_util
 from util.cv_util import CVUtil
 from django.conf import settings
-
+from urllib.parse import unquote
 
 NAME = "nsfw"
 TIMEOUT = CONFIG_NEW[NAME].timeout
@@ -69,10 +69,11 @@ def predict(request):
     begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):
-        img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, params['img_url'])
-        logger.debug(u"[elapsed-load img]: {} [url]: {}".format(params['img_url'], delta_t))
+        img_url = unquote(params['img_url'])
+        img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, img_url)
+        logger.debug(u"[elapsed-load img]: {} [url]: {}".format(img_url, delta_t))
         if img is None:
-            logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], params['img_url']))
+            logger.error("at [id]: {} load img fail from [ur]: {}".format(params['id'], img_url))
             json_str = json.dumps({"result": get_default_res(info='load img fail')})
         else:
             res, remark = _predict(img)
@@ -82,9 +83,9 @@ def predict(request):
                 json_str = json.dumps({"result": res})
 
         total_delta = round(time.time() - begin, 5) * 1000
-        logger.info(f"[id]: {params['id']} [img_url]: {params['img_url']} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
+        logger.info(f"[id]: {params['id']} [img_url]: {img_url} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
         if total_delta > TIMEOUT * 1000:
-            logger.error(f"[TIMEOUT] [id]: {params['id']} [img_url]: {params['img_url']} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
+            logger.error(f"[TIMEOUT] [id]: {params['id']} [img_url]: {img_url} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms [ELA-img]: {delta_t:.2f}ms")
 
         return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
     else:
