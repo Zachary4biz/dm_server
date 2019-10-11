@@ -22,7 +22,7 @@ from django.conf import settings
 
 NAME = "cutcut_profile"
 logger = settings.LOGGER[NAME]
-
+nsfw_threshold = 0.8
 
 def request_kw(text, is_title=True):
     keywords = []  # default
@@ -199,12 +199,22 @@ def profile_direct_api(request):
                 # print(is_success)
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
-        nsfw_res, nsfw_time, nsfw_success = result['nsfw']  # _ 是是否成功的标记，上面已经检查过并输出log了
+        nsfw_res_ori, nsfw_time, nsfw_success = result['nsfw']
         age_res, age_time, age_success = result['age']
         gender_res, gender_time, gender_success = result['gender']
         yolo_res, yolo_time, yolo_success = result['obj']
 
-        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= 0.8 else 0  # 异常时填充值为 id:-1,prob:1.0
+        # nsfw_res 要多处理一层，其返回结果是{'nsfw_prob': 0.89, 'sfw_prob': 0.11}
+        if nsfw_res_ori['nsfw_prob'] >= nsfw_threshold:
+            nsfw_res = {'id': 1, 'prob': nsfw_res_ori['nsfw_prob'], 'info': 'nsfw pic'}
+        elif nsfw_res_ori['nsfw_prob'] == -1:
+            # 返回的是默认值，说明请求异常
+            nsfw_success = "fail"
+            nsfw_res = {'id': -1, 'prob': 1.0, 'info': nsfw_res_ori['info']}
+        else:
+            nsfw_res = {'id': 0, 'prob': nsfw_res_ori['sfw_prob'], 'info': 'normal pic'}
+
+        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
         nlp_res_dict = request_nlp(title, desc)  # get NLP features
 
         res_dict.update({"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res,
