@@ -15,7 +15,7 @@ from obj_detection import yolo_service
 from config import CONFIG_NEW, NLP
 import time
 import timeout_decorator
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
 from multiprocessing import Pool
@@ -209,6 +209,7 @@ def profile_direct_api(request):
 
         # nsfw_res 要多处理一层，其返回结果是{'nsfw_prob': 0.89, 'sfw_prob': 0.11}
         if nsfw_res_ori['nsfw_prob'] >= nsfw_threshold:
+            # 只有超过阈值(0.85)才在结果中展示为nsfw pic
             nsfw_res = {'id': 1, 'prob': nsfw_res_ori['nsfw_prob'], 'info': 'nsfw pic'}
         elif nsfw_res_ori['nsfw_prob'] == -1:
             # 返回的是默认值，说明请求异常
@@ -227,7 +228,7 @@ def profile_direct_api(request):
         res_dict.update({"status": final_status})
         res_jsonstr = json.dumps(res_dict)
         total_time = round(time.time() - begin, 5) * 1000
-        logger.info(f"[id]: {id_} [img_url]: {img_url} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = nsfw:{nsfw_time:.2f}ms + age:{age_time:.2f}ms + gender:{gender_time:.2f}ms + yolo:{yolo_time:.2f}ms ")
+        logger.info(f"[id]: {id_} [img_url]: {unquote(img_url)} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = nsfw:{nsfw_time:.2f}ms + age:{age_time:.2f}ms + gender:{gender_time:.2f}ms + yolo:{yolo_time:.2f}ms ")
 
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
