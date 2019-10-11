@@ -26,18 +26,23 @@ modelClassifier = settings.ALGO_MODEL[NAME]
 
 
 def get_default_res(info="default res"):
-    return {'id': -1, 'prob': 1.0, 'info': info}
+    return {'nsfw_prob': -1, 'sfw_prob': -1, 'info': info}
 
 
 def _predict(img):
     try:
         img_pro = cvUtil.pre_cv2caffe(img)
+        # predict是一个二维数组shape(1,2)
+        # 例如: array([[0.09189981, 0.90810025]], dtype=float32)
+        # 含义是: 第一项是非nsfw概率(0.09)，第二项是nsfw概率(0.908)
         pred = modelClassifier.predict(img_pro)[0]
-        confidence = round(float(pred[pred.argmax()]), 4)
-        return {"id": int(pred.argmax()), "prob": confidence}, "success"
+        sfw_prob = round(float(pred[0]), 4)  # 非nsfw的概率
+        nsfw_prob = round(float(pred[1]), 4)  # 为nsfw的概率
+        res = {'nsfw_prob': nsfw_prob, 'sfw_prob': sfw_prob, 'info': 'success'}
+        return res, "success"
     except Exception as e:
         logger.error(e)
-        return None, repr(e.message)
+        return None, repr(e)
 
 
 #############
@@ -74,7 +79,6 @@ def predict(request):
             if res is None:
                 json_str = json.dumps({"result": get_default_res(info=remark)})
             else:
-                res.update({"info": output[res['id']]})
                 json_str = json.dumps({"result": res})
 
         total_delta = round(time.time() - begin, 5) * 1000
