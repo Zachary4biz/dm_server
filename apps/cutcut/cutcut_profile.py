@@ -24,7 +24,7 @@ from django.conf import settings
 
 NAME = "cutcut_profile"
 logger = settings.LOGGER[NAME]
-nsfw_threshold = 0.86
+nsfw_threshold = 0.8
 
 def request_kw(text, is_title=True):
     keywords = []  # default
