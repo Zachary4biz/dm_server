@@ -25,7 +25,7 @@ transformer = CVUtils.Vectorize.VectorFromNN.InceptionV3()
 
 def _predict(img):
     try:
-        res = list(transformer.imgPIL2vec(img))
+        res = [float(i) for i in transformer.imgPIL2vec(img)]
         return res, "success"
     except Exception as e:
         logger.error(e)
