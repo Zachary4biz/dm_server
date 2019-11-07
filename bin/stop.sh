@@ -12,6 +12,7 @@ if [[ ! -n "${service_name}" ]]; then
     echo " gender          |8002|         关闭 [性别检测] 服务"
     echo " nsfw            |8003|         关闭 [鉴黄] 服务"
     echo " obj             |8004|         关闭 [目标检测] 服务"
+    echo " vectorize       |8005|         关闭 [图片向量化] 服务"
     echo " cutcut_profile  |8000|         关闭 [画像总成] 服务"
     exit 1
 else
