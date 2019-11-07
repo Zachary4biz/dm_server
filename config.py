@@ -88,6 +88,7 @@ else:
         'gender': GenderParams(port=8002, service_name="gender", timeout=10, worker_num=4),
         'nsfw': NSFWParams(port=8003, service_name="nsfw", timeout=10, worker_num=4),
         'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=4),
+        'vectorize': Params(port=8005, service_name="vectorize", timeout=5, worker_num=2),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=3),
     }
 
