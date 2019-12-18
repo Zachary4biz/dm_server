@@ -48,7 +48,7 @@ class YOLOModel(object):
         self.__dict__.update(kwargs)  # and update with user overrides
         self.class_names = self._get_class()
         self.anchors = self._get_anchors()
-        self.graph = tf.get_default_graph()
+        self.graph = tf.get_default_graph() if tf.__version__ < "2.0.0" else tf.compat.v1.get_default_graph()
         with self.graph.as_default():
             self.boxes, self.scores, self.classes = self.generate()
             self.sess = K.get_session()
