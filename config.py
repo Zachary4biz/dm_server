@@ -72,16 +72,22 @@ class ObjParams(Params):
         return YOLOModel(**params)
 
 
+class EthnicityParams(Params):
+    def load_model(self):
+        from apps.ethnicity.ethnicity_model import EthnicityM
+        return EthnicityM()
+
 # 每个服务的参数
 if os.environ['SERVICE_NAME'] == "all":
-    CONFIG_NEW = {
-        'age': AgeParams(port=8001, service_name="age", timeout=10, worker_num=2),
-        'gender': GenderParams(port=8001, service_name="gender", timeout=10, worker_num=2),
-        'nsfw': NSFWParams(port=8001, service_name="nsfw", timeout=10, worker_num=4),
-        'obj': ObjParams(port=8001, service_name="obj", timeout=10, worker_num=3),
-        'cutcut_profile': Params(port=8000, service_name="cutcut_profile"),
-        'all': Params(port=8001, service_name="all"),
-    }
+    assert False, "service_name as 'all' should have been already forbidden in .sh"
+    # CONFIG_NEW = {
+    #     'age': AgeParams(port=8001, service_name="age", timeout=10, worker_num=2),
+    #     'gender': GenderParams(port=8001, service_name="gender", timeout=10, worker_num=2),
+    #     'nsfw': NSFWParams(port=8001, service_name="nsfw", timeout=10, worker_num=4),
+    #     'obj': ObjParams(port=8001, service_name="obj", timeout=10, worker_num=3),
+    #     'cutcut_profile': Params(port=8000, service_name="cutcut_profile"),
+    #     'all': Params(port=8001, service_name="all"),
+    # }
 else:
     CONFIG_NEW = {
         'age': AgeParams(port=8001, service_name="age", timeout=10, worker_num=4),
@@ -89,6 +95,7 @@ else:
         'nsfw': NSFWParams(port=8003, service_name="nsfw", timeout=10, worker_num=4),
         'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=4),
         'vectorize': Params(port=8005, service_name="vectorize", timeout=5, worker_num=2),
+        'ethnicity': Params(port=8006, service_name="ethnicity", timeout=5, worker_num=2),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=3),
     }
 
