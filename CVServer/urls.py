@@ -26,6 +26,7 @@ from apps.gender import gender_service
 from apps.nsfw import nsfw_service
 from apps.obj_detection import yolo_service
 from apps.vectorize import vectorize_service
+from apps.ethnicity import ethnicity_service
 from apps.cutcut import cutcut_profile
 
 # django2 没有RegexURLPattern这个类了，暂时没解决，取消获取所有url的接口
@@ -49,6 +50,7 @@ all_service_api_dict = {"age": [url(r'age', age_service.predict)],
                         "nsfw": [url(r'nsfw', nsfw_service.predict)],
                         "obj": [url(r'obj', yolo_service.predict)],
                         "vectorize": [url(r'vectorize', vectorize_service.predict)],
+                        "ethnicity": [url(r'ethnicity', ethnicity_service.predict)],
                         "cutcut_profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
                                            url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
                         }
