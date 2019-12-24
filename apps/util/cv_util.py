@@ -8,11 +8,11 @@ import os
 os.environ['GLOG_minloglevel'] = '2'
 from PIL import Image
 from io import BytesIO
+import dlib
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 try:
     import caffe
-    import dlib
 except Exception as e:
     print(e)
 
@@ -74,3 +74,19 @@ class CVUtil():
             right = rect.right() + h if rect.right() + h < img.shape[1] else img.shape[1]
             face_img_list.append(img[top:bottom, left:right])
         return face_img_list
+
+    def get_face_list_from_pil(self, imgPIL, enlarge=0.2, target_size=(224, 224)):
+        imgArr = np.array(imgPIL)
+        gray_img = np.array(imgPIL.convert("L"))
+        rect_list = self.dlib_detector(gray_img, 1)
+        face_img_list = []
+        for rect in rect_list:
+            (h, w) = (rect.height(), rect.width())
+            (h, w) = (int(h * enlarge), int(w * enlarge))
+            top = rect.top() - h if rect.top() - h > 0 else 0
+            bottom = rect.bottom() + h if rect.bottom() + h < imgArr.shape[0] else imgArr.shape[0]
+            left = rect.left() - h if rect.left() - h > 0 else 0
+            right = rect.right() + h if rect.right() + h < imgArr.shape[1] else imgArr.shape[1]
+            facePIL = Image.fromarray(imgArr[top:bottom, left:right]).resize(target_size)
+            face_img_list.append(np.array(facePIL))
+        return np.array(face_img_list)
