@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../"
 from zac_pyutils import ExqUtils
 ##################################################################
 # **IMPORTANT*** 环境变量配置优先级最高，必须放在CONFIG_NEW模块引入之前
-# --service 指定开启哪个服务，默认为all --host 指定ip
+# --service 指定开启哪个服务 --host 指定ip
 ##################################################################
 args_dict = ExqUtils.parse_argv(sys.argv)
 SERVICE = args_dict['service']

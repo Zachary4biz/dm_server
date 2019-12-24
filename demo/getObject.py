@@ -18,8 +18,8 @@ from keras.models import load_model
 from keras.layers import Input
 from PIL import Image, ImageFont, ImageDraw
 
-from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
-from yolo3.utils import letterbox_image
+from .yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
+from .yolo3.utils import letterbox_image
 import os
 from keras.utils import multi_gpu_model
 import itertools
@@ -259,8 +259,8 @@ def img_from_url_cv2(url):
         img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
         img = cv2.imdecode(img_array, -1)
         return img
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return None
 
 
