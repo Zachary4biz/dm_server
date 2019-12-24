@@ -23,7 +23,8 @@ else
     echo "将启动服务: ${service_name}"
 fi
 
-localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -1` # 类似实体机如mac有多个网口（wifi和usb网线）取第一个
+#localIP=`ifconfig | grep -Eo 'inet [0-9\.]+' | grep -v 127.0.0.1 | grep -Eo '[0-9\.]+' | head -2 | tail -1` # 类似实体机如mac有多个网口（wifi和usb网线）取最后一个
+localIP="0.0.0.0"
 if [[ ${service_name} = "seq" ]]; then
     echo "执行 seq， 依次启动各个服务: "
     for service in "age" "gender" "nsfw" "obj" "cutcut_profile" "vectorize" "ethnicity"
