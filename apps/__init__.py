@@ -3,10 +3,10 @@
 # usage: -
 # import一些希望外部能直接以 from apps import age 这种形式使用的包
 
-import age
-import ethnicity
-import gender
-import nsfw
-import obj_detection
-import vectorize
-import cutcut
+from . import age
+from . import ethnicity
+from . import gender
+from . import nsfw
+from . import obj_detection
+from . import vectorize
+from . import cutcut

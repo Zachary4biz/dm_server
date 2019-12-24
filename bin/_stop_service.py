@@ -21,6 +21,7 @@ def kill_service(service_name_inp):
     for line in output.split("\n"):
         params = [i for i in line.split(" ") if i != ""]
         pid = params[1]
+        print(f"    kill pid: {pid}")
         status, output = subprocess.getstatusoutput("kill -9 {}".format(pid))
         res.append([status, pid, output])
 
