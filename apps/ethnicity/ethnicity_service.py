@@ -29,7 +29,8 @@ param_check_list = ['img_url', 'id']
 
 def _predict(imgPIL):
     try:
-        faceArr, delta_t = common_util.timeit(cvUtil.get_face_list_from_pil, imgPIL)
+        faceArr, delta_t = common_util.timeit(cvUtil.get_face_list_from_pil, imgPIL=imgPIL, enlarge=0.1, target_size=(224, 224))
+        faceArr = faceArr/255
         logger.debug("[elapsed-dlib face]:{}".format(delta_t))
         if len(faceArr) == 0:
             return None, "no frontal-face detected."
@@ -40,7 +41,7 @@ def _predict(imgPIL):
             if json_response.status_code != 200:
                 raise (Exception, " ERROR: request TFServing failed")
             pred_list = np.array(json.loads(json_response.text)["predictions"])
-            res_list = [{"id": int(np.argmax(pred)), "prob": float(np.max(pred)), "info": output[int(np.argmax(pred))]} for pred in pred_list]
+            res_list = [{"id": int(np.argmax(pred)), "prob": round(float(np.max(pred)), 4), "info": output[int(np.argmax(pred))]} for pred in pred_list]
             return res_list, "success"
     except Exception as e:
         logger.error(e)
