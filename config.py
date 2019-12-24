@@ -11,6 +11,7 @@ profile: 8000
 import os
 import sys
 sys.path.append(os.path.dirname(__file__))
+from apps import ethnicity, vectorize
 from apps.util.cv_util import CVUtil
 from apps.util.logger import Logger
 cvUtil = CVUtil()
@@ -78,7 +79,7 @@ class EthnicityParams(Params):
         return EthnicityM()
 
 # 每个服务的参数
-if os.environ['SERVICE_NAME'] == "all":
+if os.environ.get('SERVICE_NAME', None) == "all":
     assert False, "service_name as 'all' should have been already forbidden in .sh"
     # CONFIG_NEW = {
     #     'age': AgeParams(port=8001, service_name="age", timeout=10, worker_num=2),
@@ -107,6 +108,21 @@ class NLP:
         pass
     tag_port = "http://newsprofile-keywords.internalapus.com/segment/tags.jsp"
     kw_port = "http://newsprofile-keywords.internalapus.com/segment/keywords.jsp"
+
+
+class TFServingParams:
+    def __init__(self, name, docker_port, service_module_dir):
+        self.name = name
+        self.docker_port = docker_port
+        self.logfile = BaseLogDir + f"/docker_{self.name}.log"
+        self.pb_path = os.path.join((os.path.abspath(service_module_dir)), "model")
+        self.serving_url = f"http://localhost:{self.docker_port}/v1/models/ethnicity:predict"
+
+
+CONFIG_TFSERVING = {
+    "ethnicity": TFServingParams(name="ethnicity", docker_port=18051, service_module_dir=os.path.dirname(ethnicity.__file__)),
+    "vectorize": TFServingParams(name="vectorize", docker_port=18052, service_module_dir=os.path.dirname(vectorize.__file__)),
+}
 
 
 if __name__ == '__main__':

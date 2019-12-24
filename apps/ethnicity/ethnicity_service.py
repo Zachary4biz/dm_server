@@ -3,40 +3,44 @@
 # usage: - 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import time
 import json
-import os
-os.environ['GLOG_minloglevel'] = '2'
-from config import CONFIG_NEW
-from util.cv_util import CVUtil
+import requests
+import numpy as np
 from django.conf import settings
 from django.http import HttpResponse
-import time
 from urllib.parse import unquote
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+os.environ['GLOG_minloglevel'] = '2'
+from config import CONFIG_NEW, CONFIG_TFSERVING
+from util.cv_util import CVUtil
 from util import common_util
-from ethnicity.ethnicity_model import EthnicityM
-import numpy as np
+
 
 NAME = "ethnicity"
 TIMEOUT = CONFIG_NEW[NAME].timeout
 output = ['Indian', 'Negroid', 'Caucasoid', 'Mongoloid']
 cvUtil = CVUtil()
 logger = settings.LOGGER[NAME]
-modelClassifier: EthnicityM = settings.ALGO_MODEL[NAME]
+# modelClassifier: EthnicityM = settings.ALGO_MODEL[NAME]
 
 param_check_list = ['img_url', 'id']
 
 
-def _predict(img):
+def _predict(imgPIL):
     try:
-        face_list, delta_t = common_util.timeit(cvUtil.get_face_list, img)
+        faceArr, delta_t = common_util.timeit(cvUtil.get_face_list_from_pil, imgPIL)
         logger.debug("[elapsed-dlib face]:{}".format(delta_t))
-        if len(face_list) == 0:
+        if len(faceArr) == 0:
             return None, "no frontal-face detected."
         else:
-            face_list = [cvUtil.pre_cv2caffe(i) for i in face_list]
-            pred_list = modelClassifier.predict_batch(face_list)
-            res_list = [{"id": np.argmax(pred), "prob": np.max(pred), "info": output[np.max(pred)]}
+            data = json.dumps({"signature_name": "serving_default", "instances": faceArr.tolist()})
+            headers = {"content-type": "application/json"}
+            json_response = requests.post(CONFIG_TFSERVING[NAME], data=data, headers=headers)
+            if json_response.status_code != 200:
+                raise (Exception, " ERROR: request TFServing failed")
+            pred_list = np.array(json.loads(json_response)["predictions"])
+            res_list = [{"id": np.argmax(pred), "prob": np.max(pred), "info": output[np.argmax(pred)[0]]}
                         for pred in pred_list]
             return res_list, "success"
     except Exception as e:
@@ -53,15 +57,15 @@ def predict(request):
     params = request.GET
     if all(i in params for i in param_check_list):
         img_url = unquote(params['img_url'])  # 图片地址里有参数，转义掉
-        img, delta_t = common_util.timeit(cvUtil.img_from_url_cv2, img_url)
+        imgPIL, delta_t = common_util.timeit(cvUtil.img_from_url_PIL, img_url)
         logger.debug("[elapsed-load img]: {} [url]: {}".format(img_url, delta_t))
-        if img is None:
+        if imgPIL is None:
             # 图片加载失败
             json_str = json.dumps({"result": get_default_res(info="load img fail")})
             logger.error("at [id]: {} load img fail [ur]: {}".format(params['id'], img_url))
         else:
             # 图片加载完毕
-            (res_list, remark) = _predict(img)
+            (res_list, remark) = _predict(imgPIL)
             if res_list is None:
                 # predict失败
                 json_str = json.dumps({"result": get_default_res(info=remark)})
