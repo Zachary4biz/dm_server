@@ -36,12 +36,11 @@ def _predict(imgPIL):
         else:
             data = json.dumps({"signature_name": "serving_default", "instances": faceArr.tolist()})
             headers = {"content-type": "application/json"}
-            json_response = requests.post(CONFIG_TFSERVING[NAME], data=data, headers=headers)
+            json_response = requests.post(CONFIG_TFSERVING[NAME].serving_url, data=data, headers=headers)
             if json_response.status_code != 200:
                 raise (Exception, " ERROR: request TFServing failed")
-            pred_list = np.array(json.loads(json_response)["predictions"])
-            res_list = [{"id": np.argmax(pred), "prob": np.max(pred), "info": output[np.argmax(pred)[0]]}
-                        for pred in pred_list]
+            pred_list = np.array(json.loads(json_response.text)["predictions"])
+            res_list = [{"id": int(np.argmax(pred)), "prob": float(np.max(pred)), "info": output[int(np.argmax(pred))]} for pred in pred_list]
             return res_list, "success"
     except Exception as e:
         logger.error(e)
