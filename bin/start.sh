@@ -27,7 +27,7 @@ fi
 localIP="0.0.0.0"
 if [[ ${service_name} = "seq" ]]; then
     echo "执行 seq， 依次启动各个服务: "
-    for service in "age" "gender" "nsfw" "obj" "cutcut_profile" "vectorize" "ethnicity"
+    for service in "age" "gender" "nsfw" "obj" "ethnicity" "vectorize" "cutcut_profile"
     do
         echo "    开启 ${service}"
         python -u _start_service_separate.py --service ${service} --host ${localIP}
