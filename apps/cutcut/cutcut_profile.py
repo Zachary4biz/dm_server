@@ -12,6 +12,7 @@ from age import age_service
 from gender import gender_service
 from nsfw import nsfw_service
 from obj_detection import yolo_service
+from ethnicity import ethnicity_service
 from config import CONFIG_NEW, NLP
 import time
 import timeout_decorator
@@ -123,7 +124,7 @@ def profile_direct_api(request):
         # inner_request = abc()
 
         p = Pool(4)
-        service_list_ = [nsfw_service, age_service, gender_service, yolo_service]
+        service_list_ = [nsfw_service, age_service, gender_service, yolo_service, ethnicity_service]
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list_]
         url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
@@ -138,9 +139,6 @@ def profile_direct_api(request):
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
         nsfw_res_ori, nsfw_time, nsfw_success = result['nsfw']
-        age_res, age_time, age_success = result['age']
-        gender_res, gender_time, gender_success = result['gender']
-        yolo_res, yolo_time, yolo_success = result['obj']
 
         # nsfw_res 要多处理一层，其返回结果是{'nsfw_prob': 0.89, 'sfw_prob': 0.11}
         if nsfw_res_ori['nsfw_prob'] >= nsfw_threshold:
@@ -152,18 +150,21 @@ def profile_direct_api(request):
             nsfw_res = {'id': -1, 'prob': 1.0, 'info': nsfw_res_ori['info']}
         else:
             nsfw_res = {'id': 0, 'prob': nsfw_res_ori['sfw_prob'], 'info': 'normal pic'}
-
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
-        nlp_res_dict = request_nlp(title, desc)  # get NLP features
 
-        res_dict.update({"age": age_res, "gender": gender_res, "obj": yolo_res, "ethnic": [], "nsfw": nsfw_res,
-                         "review_status": [is_nsfw]})
+        # get NLP features
+        nlp_res_dict = request_nlp(title, desc)
+
+        res_dict.update({info['NAME']: result[info['NAME']][0] for info in service_list})
+        res_dict.update({"review_status": [is_nsfw]})
         res_dict.update(nlp_res_dict)
-        final_status = "success" if all(i == "success" for i in [nsfw_success, age_success, gender_success, yolo_success]) else "fail"
+        final_status = "success" if all(i == "success" for i in [is_success for k, (res, delta_t, is_success) in result.items()]) else "fail"
         res_dict.update({"status": final_status})
         res_jsonstr = json.dumps(res_dict)
         total_time = round(time.time() - begin, 5) * 1000
-        logger.info(f"[id]: {id_} [img_url]: {unquote(img_url)} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = nsfw:{nsfw_time:.2f}ms + age:{age_time:.2f}ms + gender:{gender_time:.2f}ms + yolo:{yolo_time:.2f}ms ")
+
+        sub_service_time = " + ".join([f"{i['NAME']}:{result[i['NAME']][1]:.2f}ms" for i in service_list])
+        logger.info(f"[id]: {id_} [img_url]: {unquote(img_url)} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = {sub_service_time}")
 
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
 
