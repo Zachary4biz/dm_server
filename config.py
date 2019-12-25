@@ -52,8 +52,9 @@ class CaffeModelParams(Params):
         print(">>> 加载后缀为 .prototxt 和 .caffemodel 的模型文件")
         proto_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("prototxt")]
         model_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("caffemodel")]
-        print(f"""[proto_file]:{", ".join(proto_file)}\n[model_file]:{", ".join(model_file)}""")
-        assert len(proto_file) == 1 and len(model_file) == 1, f"""    目录下不能有多个模型文件"""
+        info = f"""[proto_file]:{", ".join(proto_file)}\n[model_file]:{", ".join(model_file)}"""
+        print(info)
+        assert len(proto_file) == 1 and len(model_file) == 1, f"""    目录下不能有多个模型文件\n{info}"""
         pf, mf = proto_file[0], model_file[0]
         return cvUtil.load_model(prototxt_fp=pf, caffemodel_fp=mf)
 
