@@ -21,7 +21,7 @@ import time
 import requests
 import subprocess
 import datetime
-from config import CONFIG_NEW, CONFIG_TFSERVING
+from config import CONFIG_NEW, ServingModelParams
 
 
 def test_service(serv_name):
@@ -83,20 +83,20 @@ def start_server(serv_name):
 
 
 def start_tf_serving(serv_name):
-    serv_params = CONFIG_TFSERVING[serv_name]
+    serv_params: ServingModelParams = CONFIG_NEW[serv_name]
     status, output = subprocess.getstatusoutput("docker ps -a | awk '{print $NF}'")
     if serv_params.name not in output.split("\n"):
-        zprint(">>> TFServing(docker) 未开启，将开启服务 {} 于端口 {}".format(serv_name, serv_params.docker_port))
+        zprint(">>> TFServing(docker) 未开启，将开启服务 {} 于端口 {}".format(serv_name, serv_params.tf_serving_port))
         start_cmd = f"""
-            docker run -d --rm -p {serv_params.docker_port}:8501 \
+            docker run -d --rm -p {serv_params.tf_serving_port}:8501 \
                 --name {serv_params.name} \
                 -v "{serv_params.pb_path}:/models/{serv_params.name}" \
                 -e MODEL_NAME={serv_params.name} \
-                -t tensorflow/serving > {serv_params.logfile}  &
+                -t tensorflow/serving > {serv_params.tf_serving_logfile}  &
             """.strip()
         status, output = subprocess.getstatusoutput(start_cmd)
         zprint(">>> {}: subprocess status is: ' {} ', output is: ' {} '".format("SUCCESS" if status == 0 else "FAIL", status, output))
-    zprint(">>> 内部TFServing服务 {} 已启动于端口 {} ".format(serv_name, serv_params.docker_port))
+    zprint(">>> 内部TFServing服务 {} 已启动于端口 {} ".format(serv_name, serv_params.tf_serving_port))
 
 
 if SERVICE == "all":
@@ -110,7 +110,7 @@ if SERVICE == "all":
             # all本身没有这个接口也不请求
             test_service(i)
 else:
-    if SERVICE in CONFIG_TFSERVING:
+    if SERVICE in [k for k, v in CONFIG_NEW.items() if isinstance(v, ServingModelParams)]:
         zprint(f">>> 此服务 {SERVICE} 是转发请求到TFServing，将启动对应的TFServing服务")
         start_tf_serving(SERVICE)
     start_server(SERVICE)

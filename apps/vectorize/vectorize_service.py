@@ -5,8 +5,6 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-os.environ['TFHUB_CACHE_DIR'] = os.path.dirname(__file__)+"/model"
-from zac_pyutils import CVUtils
 import time
 import json
 from util import common_util
@@ -15,18 +13,23 @@ from urllib.parse import unquote
 from config import CONFIG_NEW
 from django.http import HttpResponse
 from util.cv_util import CVUtil
+from util.model_util import TFServingModel
 
 NAME = "vectorize"
 TIMEOUT = CONFIG_NEW[NAME].timeout
 cvUtil = CVUtil()
 logger = settings.LOGGER[NAME]
-transformer = CVUtils.Vectorize.VectorFromNN.InceptionV3()
+modelClassifier: TFServingModel = settings.ALGO_MODEL[NAME]
 
 
-def _predict(img):
+def _predict(imgPIL):
     try:
-        res = [float(i) for i in transformer.imgPIL2vec(img)]
+        pred = modelClassifier.predict(imgPIL)[0]
+        res = {'vector': pred, 'info': "success"}
         return res, "success"
+    except TFServingModel.CustomException as e:
+        logger.error(e)
+        return None, "TFServing Model Failed"
     except Exception as e:
         logger.error(e)
         return None, repr(e)

@@ -11,8 +11,9 @@ profile: 8000
 import os
 import sys
 sys.path.append(os.path.dirname(__file__))
-from apps import ethnicity, vectorize
+from apps import *
 from apps.util.cv_util import CVUtil
+from apps.util.model_util import load_model, TFServingModel
 from apps.util.logger import Logger
 cvUtil = CVUtil()
 BaseDir = os.path.dirname(__file__)
@@ -42,23 +43,19 @@ class Params:
         pass
 
 
-class AgeParams(Params):
+class CaffeModelParams(Params):
+    def __init__(self, port, service_name, service_module_dir, timeout=6, worker_num=2, use_lazy=False):
+        super(CaffeModelParams, self).__init__(port, service_name, timeout=timeout, worker_num=worker_num, use_lazy=use_lazy)
+        self.service_module_dir = service_module_dir
+
     def load_model(self):
-        print(">>> init age model. [pid]:{} [ppid]:{}".format(os.getpid(), os.getppid()))
-        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/age/model/full_age.prototxt"),
-                                 caffemodel_fp=os.path.join(BaseDir, "apps/age/model/full_age.caffemodel"))
-
-
-class GenderParams(Params):
-    def load_model(self):
-        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/gender/model/gender_deploy_correct.prototxt"),
-                                 caffemodel_fp=os.path.join(BaseDir, "apps/gender/model/gender_model_correct.caffemodel"))
-
-
-class NSFWParams(Params):
-    def load_model(self):
-        return cvUtil.load_model(prototxt_fp=os.path.join(BaseDir, "apps/nsfw/model/nsfw_deploy.prototxt"),
-                                 caffemodel_fp=os.path.join(BaseDir, "apps/nsfw/model/resnet_50_1by2_nsfw.caffemodel"))
+        print(">>> 加载后缀为 .prototxt 和 .caffemodel 的模型文件")
+        proto_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("prototxt")]
+        model_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("caffemodel")]
+        print(f"""[proto_file]:{", ".join(proto_file)}\n[model_file]:{", ".join(model_file)}""")
+        assert len(proto_file) == 1 and len(model_file) == 1, f"""    目录下不能有多个模型文件"""
+        pf, mf = proto_file[0], model_file[0]
+        return cvUtil.load_model(prototxt_fp=pf, caffemodel_fp=mf)
 
 
 class ObjParams(Params):
@@ -73,10 +70,22 @@ class ObjParams(Params):
         return YOLOModel(**params)
 
 
-class EthnicityParams(Params):
+class ServingModelParams(Params):
+    def __init__(self, port, service_name, service_module_dir,
+                 tf_serving_port, tf_serving_domain="0.0.0.0",
+                 timeout=6, worker_num=2, use_lazy=False):
+        super(ServingModelParams, self).__init__(port, service_name, timeout=timeout, worker_num=worker_num, use_lazy=use_lazy)
+        self.name = service_name
+        self.tf_serving_domain = tf_serving_domain
+        self.tf_serving_port = tf_serving_port
+        self.tf_serving_logfile = BaseLogDir + f"/tf_serving_{self.name}.log"
+        self.pb_path = os.path.join((os.path.abspath(service_module_dir)), "model")
+        self.serving_url = f"http://{self.tf_serving_domain}:{self.tf_serving_port}/v1/models/{self.name}:predict"
+
+    # 在 settings.py 中调用此方法初始化模型
     def load_model(self):
-        from apps.ethnicity.ethnicity_model import EthnicityM
-        return EthnicityM()
+        return TFServingModel(self.serving_url)
+
 
 # 每个服务的参数
 if os.environ.get('SERVICE_NAME', None) == "all":
@@ -91,15 +100,20 @@ if os.environ.get('SERVICE_NAME', None) == "all":
     # }
 else:
     CONFIG_NEW = {
-        'age': AgeParams(port=8001, service_name="age", timeout=10, worker_num=4),
-        'gender': GenderParams(port=8002, service_name="gender", timeout=10, worker_num=4),
-        'nsfw': NSFWParams(port=8003, service_name="nsfw", timeout=10, worker_num=4),
+        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=4),
+        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=4),
+        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=4),
         'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=4),
-        'vectorize': Params(port=8005, service_name="vectorize", timeout=5, worker_num=2),
-        'ethnicity': Params(port=8006, service_name="ethnicity", timeout=5, worker_num=2),
+        'vectorize': ServingModelParams(port=8005, service_name="vectorize",
+                                        service_module_dir=os.path.dirname(vectorize.__file__),
+                                        tf_serving_port=18052,
+                                        timeout=5, worker_num=2),
+        'ethnicity': ServingModelParams(port=8006, service_name="ethnicity",
+                                        service_module_dir=os.path.dirname(ethnicity.__file__),
+                                        tf_serving_port=18051,
+                                        timeout=5, worker_num=2),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=3),
     }
-
 
 
 # NLP服务的地址
@@ -108,21 +122,6 @@ class NLP:
         pass
     tag_port = "http://newsprofile-keywords.internalapus.com/segment/tags.jsp"
     kw_port = "http://newsprofile-keywords.internalapus.com/segment/keywords.jsp"
-
-
-class TFServingParams:
-    def __init__(self, name, docker_port, service_module_dir):
-        self.name = name
-        self.docker_port = docker_port
-        self.logfile = BaseLogDir + f"/docker_{self.name}.log"
-        self.pb_path = os.path.join((os.path.abspath(service_module_dir)), "model")
-        self.serving_url = f"http://localhost:{self.docker_port}/v1/models/ethnicity:predict"
-
-
-CONFIG_TFSERVING = {
-    "ethnicity": TFServingParams(name="ethnicity", docker_port=18051, service_module_dir=os.path.dirname(ethnicity.__file__)),
-    "vectorize": TFServingParams(name="vectorize", docker_port=18052, service_module_dir=os.path.dirname(vectorize.__file__)),
-}
 
 
 if __name__ == '__main__':

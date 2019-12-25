@@ -5,24 +5,22 @@ import os
 import sys
 import time
 import json
-import requests
 import numpy as np
 from django.conf import settings
 from django.http import HttpResponse
 from urllib.parse import unquote
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-os.environ['GLOG_minloglevel'] = '2'
-from config import CONFIG_NEW, CONFIG_TFSERVING
+from config import CONFIG_NEW
 from util.cv_util import CVUtil
 from util import common_util
-
+from util.model_util import TFServingModel
 
 NAME = "ethnicity"
 TIMEOUT = CONFIG_NEW[NAME].timeout
 output = ['Indian', 'Negroid', 'Caucasoid', 'Mongoloid']
 cvUtil = CVUtil()
 logger = settings.LOGGER[NAME]
-# modelClassifier: EthnicityM = settings.ALGO_MODEL[NAME]
+modelClassifier: TFServingModel = settings.ALGO_MODEL[NAME]
 
 param_check_list = ['img_url', 'id']
 
@@ -35,14 +33,12 @@ def _predict(imgPIL):
         if len(faceArr) == 0:
             return None, "no frontal-face detected."
         else:
-            data = json.dumps({"signature_name": "serving_default", "instances": faceArr.tolist()})
-            headers = {"content-type": "application/json"}
-            json_response = requests.post(CONFIG_TFSERVING[NAME].serving_url, data=data, headers=headers)
-            if json_response.status_code != 200:
-                raise (Exception, " ERROR: request TFServing failed")
-            pred_list = np.array(json.loads(json_response.text)["predictions"])
+            pred_list = modelClassifier.predict(imgPIL)
             res_list = [{"id": int(np.argmax(pred)), "prob": round(float(np.max(pred)), 4), "info": output[int(np.argmax(pred))]} for pred in pred_list]
             return res_list, "success"
+    except TFServingModel.CustomException as e:
+        logger.error(e)
+        return None, "TFServing Model Failed"
     except Exception as e:
         logger.error(e)
         return None, repr(e)
