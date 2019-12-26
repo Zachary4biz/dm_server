@@ -92,6 +92,7 @@ def start_tf_serving(serv_name):
                 --name {serv_params.name} \
                 -v "{serv_params.pb_path}:/models/{serv_params.name}" \
                 -e MODEL_NAME={serv_params.name} \
+                -e TF_CPP_MIN_VLOG_LEVEL={serv_params.tf_serving_loglevel} \
                 -t tensorflow/serving > {serv_params.tf_serving_logfile}  &
             """.strip()
         status, output = subprocess.getstatusoutput(start_cmd)

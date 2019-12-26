@@ -71,13 +71,14 @@ class ObjParams(Params):
 
 class ServingModelParams(Params):
     def __init__(self, port, service_name, service_module_dir,
-                 tf_serving_port, tf_serving_domain="0.0.0.0",
+                 tf_serving_port, tf_serving_loglevel, tf_serving_domain="0.0.0.0",
                  timeout=6, worker_num=2, use_lazy=False):
         super(ServingModelParams, self).__init__(port, service_name, timeout=timeout, worker_num=worker_num, use_lazy=use_lazy)
         self.name = service_name
         self.tf_serving_domain = tf_serving_domain
         self.tf_serving_port = tf_serving_port
         self.tf_serving_logfile = BaseLogDir + f"/tf_serving_{self.name}.log"
+        self.tf_serving_loglevel = tf_serving_loglevel
         self.pb_path = os.path.join((os.path.abspath(service_module_dir)), "model")
         self.serving_url = f"http://{self.tf_serving_domain}:{self.tf_serving_port}/v1/models/{self.name}:predict"
 
@@ -105,11 +106,11 @@ else:
         'obj': ObjParams(port=9004, service_name="obj", timeout=10, worker_num=1),
         'vectorize': ServingModelParams(port=9005, service_name="vectorize",
                                         service_module_dir=os.path.dirname(vectorize.__file__),
-                                        tf_serving_port=18052,
+                                        tf_serving_port=18052, tf_serving_loglevel=2,
                                         timeout=5, worker_num=1),
         'ethnicity': ServingModelParams(port=9006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
-                                        tf_serving_port=18051,
+                                        tf_serving_port=18051, tf_serving_loglevel=3,
                                         timeout=10, worker_num=1),
         'cutcut_profile': Params(port=9000, service_name="cutcut_profile", worker_num=1),
     }
