@@ -18,7 +18,7 @@ if [[ ! -n "${service_name}" ]]; then
     exit 1
 else
     if [[ ${service_name} = "all" ]]; then
-        for service in "age" "gender" "nsfw" "obj" "cutcut_profile"
+        for service in "age" "gender" "nsfw" "obj" "vectorize" "ethnicity" "cutcut_profile"
         do
             echo "将kill服务: ${service}"
 #            python -u _stop_service.py ${service}

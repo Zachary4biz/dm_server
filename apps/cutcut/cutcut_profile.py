@@ -158,6 +158,8 @@ def profile_direct_api(request):
 
         res_dict.update({info['NAME']: result[info['NAME']][0] for info in service_list})
         res_dict.update({"review_status": [is_nsfw]})
+        if nsfw_res['id'] == -1:
+            res_dict.update({"review_status": [2]})  # 如果id标记为-1表示nsfw检测服务异常了，这类图标记为先发后审
         res_dict.update(nlp_res_dict)
         final_status = "success" if all(i == "success" for i in [is_success for k, (res, delta_t, is_success) in result.items()]) else "fail"
         res_dict.update({"status": final_status})
@@ -180,7 +182,7 @@ def default_profile(request):
         "ethnic": [],
         "obj": [],
         "nsfw": {},
-        "review_status": [0],
+        "review_status": [2],
         "title_keywords": [],
         "content_keywords": [],
         "status": "fail"
