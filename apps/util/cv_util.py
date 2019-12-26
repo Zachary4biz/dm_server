@@ -17,18 +17,9 @@ except Exception as e:
     print(e)
 
 
-
-class CVUtil():
+class CVUtil:
     def __init__(self):
         self.dlib_detector = dlib.get_frontal_face_detector()
-
-    @staticmethod
-    def load_model(prototxt_fp, caffemodel_fp, dims_inp=None, mean_inp=None, raw_scale_inp=255.0,
-                   channel_swap_inp=(2, 1, 0)):
-        dims = [256, 256] if dims_inp is None else dims_inp
-        mean = np.array([104, 117, 123]) if mean_inp is None else mean_inp
-        return caffe.Classifier(prototxt_fp, caffemodel_fp, image_dims=dims, mean=mean, raw_scale=raw_scale_inp,
-                                channel_swap=channel_swap_inp)
 
     @staticmethod
     def img_from_url_cv2(url):
