@@ -110,7 +110,7 @@ else:
         'ethnicity': ServingModelParams(port=9006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
                                         tf_serving_port=18051,
-                                        timeout=5, worker_num=1),
+                                        timeout=10, worker_num=1),
         'cutcut_profile': Params(port=9000, service_name="cutcut_profile", worker_num=1),
     }
 
