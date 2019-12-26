@@ -15,10 +15,8 @@ from obj_detection import yolo_service
 from ethnicity import ethnicity_service
 from config import CONFIG_NEW, NLP
 import time
-import timeout_decorator
-from urllib.parse import quote, unquote
+from urllib.parse import quote, unquote, urlparse, urlencode
 
-from zac_pyutils.Timeout import TimeoutThread, TimeoutProcess
 from multiprocessing import Pool
 import traceback
 from django.conf import settings
@@ -26,6 +24,7 @@ from django.conf import settings
 NAME = "cutcut_profile"
 logger = settings.LOGGER[NAME]
 nsfw_threshold = 0.8
+
 
 def request_kw(text, is_title=True):
     keywords = []  # default
@@ -90,7 +89,9 @@ def profile_direct_api(request):
     # params-check
     if all(i in params for i in param_check_list):
         img_url = params.get("img_url")
-        img_url = quote(img_url)
+        parts = urlparse(img_url)
+        build_url = parts._replace(query=urlencode({"mode": 0, "w": 800, "h": 800})).geturl()
+        img_url = quote(build_url)
         id_ = params.get("id")
         title = params.get("title")
         desc = params.get("description")
