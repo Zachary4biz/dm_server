@@ -32,7 +32,7 @@ def get_default_res(info="default res"):
 
 def _predict(imgPIL):
     try:
-        faceArr, delta_t = common_util.timeit(cvUtil.get_face_list_from_pil, imgPIL=imgPIL, enlarge=0.1, target_size=(224, 224))
+        faceArr, delta_t = common_util.timeit(cvUtil.get_face_list_from_pil, imgPIL=imgPIL, enlarge=0.2, target_size=(224, 224))
         faceArr = faceArr/255
         logger.debug("[elapsed-dlib face]:{}".format(delta_t))
         if len(faceArr) == 0:
