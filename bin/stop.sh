@@ -21,11 +21,13 @@ else
         for service in "age" "gender" "nsfw" "obj" "cutcut_profile"
         do
             echo "将kill服务: ${service}"
-            python -u _stop_service.py ${service}
+#            python -u _stop_service.py ${service}
+            ps -ef | grep gunicorn | grep ${service}  | awk '{print $2}' | xargs kill -9
         done
     else
         echo "将kill服务: ${service_name}"
-        python -u _stop_service.py ${service_name}
+        ps -ef | grep gunicorn | grep ${service_name}  | awk '{print $2}' | xargs kill -9
+#        python -u _stop_service.py ${service_name}
     fi
 fi
 

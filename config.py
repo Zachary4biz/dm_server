@@ -100,19 +100,19 @@ if os.environ.get('SERVICE_NAME', None) == "all":
     # }
 else:
     CONFIG_NEW = {
-        'age': CaffeModelParams(port=9001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=1),
-        'gender': CaffeModelParams(port=9002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=1),
-        'nsfw': CaffeModelParams(port=9003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=1),
-        'obj': ObjParams(port=9004, service_name="obj", timeout=10, worker_num=1),
-        'vectorize': ServingModelParams(port=9005, service_name="vectorize",
+        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=5),
+        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=5),
+        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=5),
+        'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=5),
+        'vectorize': ServingModelParams(port=8005, service_name="vectorize",
                                         service_module_dir=os.path.dirname(vectorize.__file__),
                                         tf_serving_port=18052, tf_serving_loglevel=2,
-                                        timeout=5, worker_num=1),
-        'ethnicity': ServingModelParams(port=9006, service_name="ethnicity",
+                                        timeout=5, worker_num=3),
+        'ethnicity': ServingModelParams(port=8006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
                                         tf_serving_port=18051, tf_serving_loglevel=3,
-                                        timeout=10, worker_num=1),
-        'cutcut_profile': Params(port=9000, service_name="cutcut_profile", worker_num=1),
+                                        timeout=10, worker_num=3),
+        'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=5),
     }
 
 
