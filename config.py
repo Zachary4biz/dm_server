@@ -12,10 +12,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(__file__))
 from apps import *
-from apps.util.cv_util import CVUtil
-from apps.util.model_util import load_model, TFServingModel
+from apps.util import model_util
 from apps.util.logger import Logger
-cvUtil = CVUtil()
 BaseDir = os.path.dirname(__file__)
 BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
 if not os.path.exists(BaseLogDir):
@@ -46,17 +44,17 @@ class Params:
 class CaffeModelParams(Params):
     def __init__(self, port, service_name, service_module_dir, timeout=6, worker_num=2, use_lazy=False):
         super(CaffeModelParams, self).__init__(port, service_name, timeout=timeout, worker_num=worker_num, use_lazy=use_lazy)
-        self.service_module_dir = service_module_dir
+        self.model_dir = os.path.join(service_module_dir, "model")
 
     def load_model(self):
         print(">>> 加载后缀为 .prototxt 和 .caffemodel 的模型文件")
-        proto_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("prototxt")]
-        model_file = [os.path.join(self.service_module_dir, file) for file in os.listdir(self.service_module_dir) if file.endswith("caffemodel")]
+        proto_file = [os.path.join(self.model_dir, file) for file in os.listdir(self.model_dir) if file.endswith("prototxt")]
+        model_file = [os.path.join(self.model_dir, file) for file in os.listdir(self.model_dir) if file.endswith("caffemodel")]
         info = f"""[proto_file]:{", ".join(proto_file)}\n[model_file]:{", ".join(model_file)}"""
         print(info)
-        assert len(proto_file) == 1 and len(model_file) == 1, f"""    目录下不能有多个模型文件\n{info}"""
+        assert len(proto_file) == 1 and len(model_file) == 1, f"""    目录下必须有且只有一个模型文件，当前如下：\n{info}"""
         pf, mf = proto_file[0], model_file[0]
-        return cvUtil.load_model(prototxt_fp=pf, caffemodel_fp=mf)
+        return model_util.load_model(prototxt_fp=pf, caffemodel_fp=mf)
 
 
 class ObjParams(Params):
@@ -85,7 +83,7 @@ class ServingModelParams(Params):
 
     # 在 settings.py 中调用此方法初始化模型
     def load_model(self):
-        return TFServingModel(self.serving_url)
+        return model_util.TFServingModel(self.serving_url)
 
 
 # 每个服务的参数
