@@ -54,7 +54,9 @@ class CVUtil:
 
     def get_face_list(self, img, enlarge=0.2):
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        rect_list = self.dlib_detector(gray_img, 2)
+        rect_list = self.dlib_detector(gray_img, 1)
+        if len(rect_list) == 0:
+            rect_list = self.dlib_detector(gray_img, 2)
         face_img_list = []
         for rect in rect_list:
             (h, w) = (rect.height(), rect.width())
@@ -69,7 +71,9 @@ class CVUtil:
     def get_face_list_from_pil(self, imgPIL, enlarge=0.2, target_size=(224, 224)):
         imgArr = np.array(imgPIL)
         gray_img = np.array(imgPIL.convert("L"))
-        rect_list = self.dlib_detector(gray_img, 2)
+        rect_list = self.dlib_detector(gray_img, 1)
+        if len(rect_list) == 0:
+            rect_list = self.dlib_detector(gray_img, 2)
         face_img_list = []
         for rect in rect_list:
             (h, w) = (rect.height(), rect.width())
