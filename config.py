@@ -106,11 +106,11 @@ else:
         'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=5),
         'vectorize': ServingModelParams(port=8005, service_name="vectorize",
                                         service_module_dir=os.path.dirname(vectorize.__file__),
-                                        tf_serving_port=18052, tf_serving_loglevel=2,
+                                        tf_serving_port=18052, tf_serving_loglevel=0,
                                         timeout=5, worker_num=3),
         'ethnicity': ServingModelParams(port=8006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
-                                        tf_serving_port=18051, tf_serving_loglevel=3,
+                                        tf_serving_port=18051, tf_serving_loglevel=0,
                                         timeout=10, worker_num=3),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=5),
     }
