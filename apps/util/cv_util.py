@@ -1,7 +1,7 @@
 # author: zac
 # create-time: 2019-07-09 16:25
 # usage: - 
-import urllib.request
+import urllib
 import numpy as np
 import cv2
 import os
@@ -37,7 +37,14 @@ class CVUtil:
         try:
             url_response = urllib.request.urlopen(url)
             image = Image.open(BytesIO(url_response.read()))
-            return image
+            if os.path.splitext(urllib.parse.urlparse(url).path)[-1] == ".png":
+                # png图片要转成RGBA，然后再转成RGB（这里直接转RGB会造成背景色问题，改为用粘贴到白色底图的方法）
+                image = image.convert("RGBA")
+                background = Image.new("RGB", image.size, (255, 255, 255))
+                background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
+                return background
+            else:
+                return image
         except Exception as e:
             print("load img from url failed: "+str(e))
             return None
