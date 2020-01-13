@@ -96,11 +96,11 @@ def update_nsfw(inp_res, inplace=True):
     else:
         nsfw_res = {'id': 0, 'prob': inp_nsfw['sfw_prob'], 'info': 'normal pic'}
     if inplace:
-        inp_res.update("nsfw", (nsfw_res, nsfw_time, nsfw_success))
+        inp_res.update({"nsfw": (nsfw_res, nsfw_time, nsfw_success)})
         return inp_res
     else:
         inp_res_ = copy.deepcopy(inp_res)
-        inp_res_.update("nsfw", (nsfw_res, nsfw_time, nsfw_success))
+        inp_res_.update({"nsfw": (nsfw_res, nsfw_time, nsfw_success)})
         return inp_res_
 
 
