@@ -7,6 +7,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import json
+import copy
 import requests
 from age import age_service
 from gender import gender_service
@@ -82,6 +83,27 @@ def request_service_http_multiProcess(zipped_param):
     return res, delta_t, is_success
 
 
+# inplace and return
+def update_nsfw(inp_res, inplace=True):
+    inp_nsfw, nsfw_time, nsfw_success = inp_res['nsfw']
+    if inp_nsfw['nsfw_prob'] >= nsfw_threshold:
+        # 只有超过阈值(0.85)才在结果中展示为nsfw pic
+        nsfw_res = {'id': 1, 'prob': inp_nsfw['nsfw_prob'], 'info': 'nsfw pic'}
+    elif inp_nsfw['nsfw_prob'] == -1:
+        # 返回的是默认值，说明请求异常
+        nsfw_success = "fail"
+        nsfw_res = {'id': -1, 'prob': 1.0, 'info': inp_nsfw['info']}
+    else:
+        nsfw_res = {'id': 0, 'prob': inp_nsfw['sfw_prob'], 'info': 'normal pic'}
+    if inplace:
+        inp_res.update("nsfw", (nsfw_res, nsfw_time, nsfw_success))
+        return inp_res
+    else:
+        inp_res_ = copy.deepcopy(inp_res)
+        inp_res_.update("nsfw", (nsfw_res, nsfw_time, nsfw_success))
+        return inp_res_
+
+
 @csrf_exempt
 def profile_direct_api(request):
     params = request.POST
@@ -139,18 +161,9 @@ def profile_direct_api(request):
                 # print(is_success)
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
-        nsfw_res_ori, nsfw_time, nsfw_success = result['nsfw']
+        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, inplace=True)
 
-        # nsfw_res 要多处理一层，其返回结果是{'nsfw_prob': 0.89, 'sfw_prob': 0.11}
-        if nsfw_res_ori['nsfw_prob'] >= nsfw_threshold:
-            # 只有超过阈值(0.85)才在结果中展示为nsfw pic
-            nsfw_res = {'id': 1, 'prob': nsfw_res_ori['nsfw_prob'], 'info': 'nsfw pic'}
-        elif nsfw_res_ori['nsfw_prob'] == -1:
-            # 返回的是默认值，说明请求异常
-            nsfw_success = "fail"
-            nsfw_res = {'id': -1, 'prob': 1.0, 'info': nsfw_res_ori['info']}
-        else:
-            nsfw_res = {'id': 0, 'prob': nsfw_res_ori['sfw_prob'], 'info': 'normal pic'}
+        # nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
 
         # get NLP features
