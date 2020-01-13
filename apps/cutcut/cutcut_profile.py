@@ -161,7 +161,7 @@ def profile_direct_api(request):
                 # print(is_success)
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
-        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, inplace=True)
+        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, inplace=True)['nsfw']
 
         # nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
