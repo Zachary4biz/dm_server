@@ -18,7 +18,7 @@ from services import api_format_predict
 
 NAME = "ethnicity"
 TIMEOUT = CONFIG_NEW[NAME].timeout
-output = ['Indian', 'Negroid', 'Caucasoid', 'Mongoloid']
+output = ['Caucasoid', 'Mongoloid', 'Indian', 'Negroid']
 cvUtil = CVUtil()
 logger = settings.LOGGER[NAME]
 modelClassifier: TFServingModel = settings.ALGO_MODEL[NAME]
