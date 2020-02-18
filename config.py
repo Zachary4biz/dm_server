@@ -103,10 +103,10 @@ if os.environ.get('SERVICE_NAME', None) == "all":
     # }
 else:
     CONFIG_NEW = {
-        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=2),
-        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=2),
-        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=2),
-        'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=2),
+        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=5),
+        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=5),
+        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=5),
+        'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=5),
         'vectorize': ServingModelParams(port=8005, service_name="vectorize",
                                         service_module_dir=os.path.dirname(vectorize.__file__),
                                         tf_serving_port=18052, tf_serving_loglevel=0,
@@ -114,16 +114,16 @@ else:
         'ethnicity': ServingModelParams(port=8006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
                                         tf_serving_port=18051, tf_serving_loglevel=0,
-                                        timeout=10, worker_num=2),
+                                        timeout=10, worker_num=3),
         'nsfw_obj': ServingModelParams(port=8007, service_name="nsfw_obj",
                                         service_module_dir=os.path.dirname(nsfw_obj.__file__),
                                         tf_serving_port=18053, tf_serving_loglevel=0,
-                                        timeout=10, worker_num=2),
+                                        timeout=10, worker_num=4),
         'nsfw_bcnn': ServingModelParams(port=8008, service_name="nsfw_bcnn",
                                         service_module_dir=os.path.dirname(nsfw_bcnn.__file__),
                                         tf_serving_port=18054, tf_serving_loglevel=0,
-                                        timeout=10, worker_num=2),
-        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",worker_num=2),
+                                        timeout=10, worker_num=4),
+        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",worker_num=5),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=2),
     }
     allP=[v for k,v in CONFIG_NEW.items()]
