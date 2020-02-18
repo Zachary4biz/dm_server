@@ -15,9 +15,12 @@ if [[ ! -n "${service_name}" ]]; then
     echo " nsfw            |8003|         开启 [鉴黄] 服务"
     echo " obj             |8004|         开启 [目标检测] 服务"
     echo " vectorize       |8005|         开启 [图片向量化] 服务"
-    echo " ethnicity       |8006|         开启 [人种分类] 服务"
     echo "    - 补充说明：profile服务不会请求vectorize服务"
-    echo " cutcut_profile  |8000|         开启 [画像总成] 服务"
+    echo " ethnicity       |8006|         开启 [人种分类] 服务"
+    echo " nsfw_obj        |8007|         开启 [鉴黄obj] 服务"
+    echo " nsfw_bcnn       |8008|         开启 [鉴黄bcnn] 服务"
+    echo " nsfw_ensemble   |8009|         开启 [鉴黄总承] 服务"
+    echo " cutcut_profile  |8000|         开启 [画像总承] 服务"
     exit 1
 else
     echo "将启动服务: ${service_name}"
@@ -27,11 +30,22 @@ fi
 localIP="0.0.0.0"
 if [[ ${service_name} = "seq" ]]; then
     echo "执行 seq， 依次启动各个服务: "
-    for service in "age" "gender" "nsfw" "obj" "ethnicity" "vectorize" "cutcut_profile"
-    do
-        echo "    开启 ${service}"
-        python -u _start_service_separate.py --service ${service} --host ${localIP}
-    done
+    allServiceStr="age,gender,nsfw_obj,nsfw_bcnn,nsfw_ensemble,obj,ethnicity,cutcut_profile"
+    allService=(${allServiceStr//,/ })
+    echo "allService as :"
+    for service in ${allService[@]};do echo $service;done
+    read -r -p "confirm services [y/n] " input
+
+    if [[ ${input} = "n" ]]; then
+        echo "exit..."
+        exit 1
+    elif [[ ${input} = "y" ]]; then
+        for service in ${allService[@]};
+        do
+            echo "    开启 ${service}"
+            python -u _start_service_separate.py --service ${service} --host ${localIP}
+        done
+    fi
 elif [[ ${service_name} = "all" ]]; then
     echo "*** all方式废弃 ***"
     echo "实现上为了兼容会非常冗杂，需要手动更改配置文件或者传入指定的配置文件"

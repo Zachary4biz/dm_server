@@ -12,10 +12,12 @@ import os
 import sys
 sys.path.append(os.path.dirname(__file__))
 from apps import *
+from apps.nsfw import nsfw_bcnn,nsfw_obj
 from apps.util import model_util
 from apps.util.logger import Logger
 BaseDir = os.path.dirname(__file__)
 BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
+TFServingPort=8501
 if not os.path.exists(BaseLogDir):
     os.mkdir(BaseLogDir)
 
@@ -36,6 +38,7 @@ class Params:
         # 是否使用懒加载初始化各个子服务？一般都不考虑使用懒加载，避免加载过程中来的请求全都超时了
         self.use_lazy = use_lazy
         self.logger = Logger(loggername=service_name, log2console=False, log2file=True, logfile=self.service_logfile).get_logger()
+        self.service_name = service_name
 
     def load_model(self):
         pass
@@ -74,13 +77,13 @@ class ServingModelParams(Params):
                  tf_serving_port, tf_serving_loglevel, tf_serving_domain="0.0.0.0",
                  timeout=6, worker_num=2, use_lazy=False):
         super(ServingModelParams, self).__init__(port, service_name, timeout=timeout, worker_num=worker_num, use_lazy=use_lazy)
-        self.name = service_name
         self.tf_serving_domain = tf_serving_domain
         self.tf_serving_port = tf_serving_port
-        self.tf_serving_logfile = BaseLogDir + f"/tf_serving_{self.name}.log"
+        self.tf_serving_logfile = BaseLogDir + f"/tf_serving_{self.service_name}.log"
         self.tf_serving_loglevel = tf_serving_loglevel
         self.pb_path = os.path.join((os.path.abspath(service_module_dir)), "model")
-        self.serving_url = f"http://{self.tf_serving_domain}:{self.tf_serving_port}/v1/models/{self.name}:predict"
+        self.serving_url = f"http://{self.tf_serving_domain}:{self.tf_serving_port}/v1/models/{self.service_name}:predict"
+        self.service_module_dir = service_module_dir
 
     # 在 settings.py 中调用此方法初始化模型
     def load_model(self):
@@ -100,20 +103,34 @@ if os.environ.get('SERVICE_NAME', None) == "all":
     # }
 else:
     CONFIG_NEW = {
-        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=5),
-        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=5),
-        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=5),
-        'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=5),
+        'age': CaffeModelParams(port=8001, service_name="age", service_module_dir=os.path.dirname(age.__file__), timeout=10, worker_num=2),
+        'gender': CaffeModelParams(port=8002, service_name="gender", service_module_dir=os.path.dirname(gender.__file__), timeout=10, worker_num=2),
+        'nsfw': CaffeModelParams(port=8003, service_name="nsfw", service_module_dir=os.path.dirname(nsfw.__file__), timeout=10, worker_num=2),
+        'obj': ObjParams(port=8004, service_name="obj", timeout=10, worker_num=2),
         'vectorize': ServingModelParams(port=8005, service_name="vectorize",
                                         service_module_dir=os.path.dirname(vectorize.__file__),
                                         tf_serving_port=18052, tf_serving_loglevel=0,
-                                        timeout=5, worker_num=3),
+                                        timeout=5, worker_num=2),
         'ethnicity': ServingModelParams(port=8006, service_name="ethnicity",
                                         service_module_dir=os.path.dirname(ethnicity.__file__),
                                         tf_serving_port=18051, tf_serving_loglevel=0,
-                                        timeout=10, worker_num=3),
-        'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=5),
+                                        timeout=10, worker_num=2),
+        'nsfw_obj': ServingModelParams(port=8007, service_name="nsfw_obj",
+                                        service_module_dir=os.path.dirname(nsfw_obj.__file__),
+                                        tf_serving_port=18053, tf_serving_loglevel=0,
+                                        timeout=10, worker_num=2),
+        'nsfw_bcnn': ServingModelParams(port=8008, service_name="nsfw_bcnn",
+                                        service_module_dir=os.path.dirname(nsfw_bcnn.__file__),
+                                        tf_serving_port=18054, tf_serving_loglevel=0,
+                                        timeout=10, worker_num=2),
+        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",worker_num=2),
+        'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=2),
     }
+    allP=[v for k,v in CONFIG_NEW.items()]
+    assert len(allP) == len(set([p.port for p in allP]))
+    tfservingP=[p for p in allP if isinstance(p,ServingModelParams)]
+    assert len(tfservingP) == len(set([p.tf_serving_port for p in tfservingP]))
+    assert all([k==v.service_name for k,v in CONFIG_NEW.items()])
 
 
 # NLP服务的地址

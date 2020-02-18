@@ -11,7 +11,8 @@ import copy
 import requests
 from age import age_service
 from gender import gender_service
-from nsfw import nsfw_service
+# from nsfw import nsfw_service
+from nsfw import nsfw_ensemble_service
 from obj_detection import yolo_service
 from ethnicity import ethnicity_service
 from config import CONFIG_NEW, NLP
@@ -84,8 +85,8 @@ def request_service_http_multiProcess(zipped_param):
 
 
 # inplace and return
-def update_nsfw(inp_res, inplace=True):
-    inp_nsfw, nsfw_time, nsfw_success = inp_res['nsfw']
+def update_nsfw(inp_res, key="nsfw", inplace=True):
+    inp_nsfw, nsfw_time, nsfw_success = inp_res[key]
     if inp_nsfw['nsfw_prob'] >= nsfw_threshold:
         # 只有超过阈值(0.85)才在结果中展示为nsfw pic
         nsfw_res = {'id': 1, 'prob': inp_nsfw['nsfw_prob'], 'info': 'nsfw pic'}
@@ -95,12 +96,13 @@ def update_nsfw(inp_res, inplace=True):
         nsfw_res = {'id': -1, 'prob': 1.0, 'info': inp_nsfw['info']}
     else:
         nsfw_res = {'id': 0, 'prob': inp_nsfw['sfw_prob'], 'info': 'normal pic'}
+    
     if inplace:
-        inp_res.update({"nsfw": (nsfw_res, nsfw_time, nsfw_success)})
+        inp_res.update({key: (nsfw_res, nsfw_time, nsfw_success)})
         return inp_res
     else:
         inp_res_ = copy.deepcopy(inp_res)
-        inp_res_.update({"nsfw": (nsfw_res, nsfw_time, nsfw_success)})
+        inp_res_.update({key: (nsfw_res, nsfw_time, nsfw_success)})
         return inp_res_
 
 
@@ -147,7 +149,7 @@ def profile_direct_api(request):
         # inner_request = abc()
 
         p = Pool(4)
-        service_list_ = [nsfw_service, age_service, gender_service, yolo_service, ethnicity_service]
+        service_list_ = [nsfw_ensemble_service, age_service, gender_service, yolo_service, ethnicity_service]
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list_]
         url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
@@ -161,10 +163,12 @@ def profile_direct_api(request):
                 # print(is_success)
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
-        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, inplace=True)['nsfw']
-
+        # 根据阈值nsfw_threshold更新result里nsfw的结果
+        # 并取出nsfw的阈值判断是否为黄图，用于更新review_status
+        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, key=nsfw_ensemble_service.NAME,inplace=True)[nsfw_ensemble_service.NAME]
         # nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
         is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
+        sub_service_time = " + ".join([f"{i['NAME']}:{result[i['NAME']][1]:.2f}ms" for i in service_list])
 
         # get NLP features
         nlp_res_dict = request_nlp(title, desc)
@@ -176,10 +180,10 @@ def profile_direct_api(request):
         res_dict.update(nlp_res_dict)
         final_status = "success" if all(i == "success" for i in [is_success for k, (res, delta_t, is_success) in result.items()]) else "fail"
         res_dict.update({"status": final_status})
+        res_dict['nsfw']=res_dict.pop(nsfw_ensemble_service.NAME)
         res_jsonstr = json.dumps(res_dict)
         total_time = round(time.time() - begin, 5) * 1000
 
-        sub_service_time = " + ".join([f"{i['NAME']}:{result[i['NAME']][1]:.2f}ms" for i in service_list])
         logger.info(f"[id]: {id_} [img_url]: {unquote(img_url)} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = {sub_service_time}")
 
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")

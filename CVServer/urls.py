@@ -23,7 +23,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__), "../../"
 from CVServer import basic_view
 from apps.age import age_service
 from apps.gender import gender_service
-from apps.nsfw import nsfw_service
+from apps.nsfw import nsfw_service,nsfw_ensemble_service
+from apps.nsfw.nsfw_bcnn import nsfw_bcnn_service
+from apps.nsfw.nsfw_obj import nsfw_obj_service
 from apps.obj_detection import yolo_service
 from apps.vectorize import vectorize_service
 from apps.ethnicity import ethnicity_service
@@ -51,9 +53,21 @@ all_service_api_dict = {"age": [url(r'age', age_service.predict)],
                         "obj": [url(r'obj', yolo_service.predict)],
                         "vectorize": [url(r'vectorize', vectorize_service.predict)],
                         "ethnicity": [url(r'ethnicity', ethnicity_service.predict)],
+                        "nsfw_bcnn": [url(r'nsfw_bcnn', nsfw_bcnn_service.predict)],
+                        "nsfw_obj": [url(r'nsfw_obj', nsfw_obj_service.predict)],
+                        "nsfw_ensemble": [url(r'nsfw_ensemble', nsfw_ensemble_service.predict)],
                         "cutcut_profile": [url(r'cutcut_profile', csrf_exempt(cutcut_profile.profile_direct_api)),
                                            url(r'cutcut_default_profile', csrf_exempt(cutcut_profile.default_profile))]
                         }
+
+# 确保 all_service_api_dict 不会出现key和url的regex对不上的情况
+# 比如key为nsfw_obj时 regex写成了ethnicity
+# 也没有生效
+# assert [k==v[0].pattern.describe().strip("'")   for k,v in all_service_api_dict.itmes()],"urls.py配置可路由时，要求确保使用 HOST:PORT/service_name 能访问到对应服务"
+
+# 实验发现这里导入没有问题 但是assert也没生效
+# from config import CONFIG_NEW
+# assert CONFIG_NEW.keys() == all_service_api_dict.keys(), "确保config里配置的服务和urls路由里配置的服务都是对应的"
 
 urlpatterns = []
 if os.environ['SERVICE_NAME'] == "all":
