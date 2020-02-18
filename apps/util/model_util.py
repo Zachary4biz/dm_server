@@ -17,13 +17,16 @@ class TFServingModel:
     def __init__(self, serving_url):
         self.serving_url = serving_url
 
-    def predict(self, imgPIL):
-        data = json.dumps({"signature_name": "serving_default", "instances": [np.array(imgPIL).tolist()]})
+    # img给imgPIL和imgArr都可以
+    # np.array(ndarray) 的结果还是ndarray
+    # 返回结果直接是json.loads没有用np.array()封装，因为yolo返回的是字典
+    def predict(self, img):
+        data = json.dumps({"signature_name": "serving_default", "instances": [np.array(img).tolist()]})
         headers = {"content-type": "application/json"}
         json_response = requests.post(self.serving_url, data=data, headers=headers)
         if json_response.status_code != 200:
             raise self.CustomException(f"request TFServing failed. status_code: {json_response.status_code} content: {json_response.text}")
-        predictions = np.array(json.loads(json_response.text)["predictions"])
+        predictions = json.loads(json_response.text)["predictions"][0]
         return predictions
 
 

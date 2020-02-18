@@ -26,7 +26,7 @@ def get_default_res(info="default res"):
 
 def _predict(imgPIL):
     try:
-        pred = modelClassifier.predict(imgPIL)[0]
+        pred = np.array(modelClassifier.predict(imgPIL)[0])
         res = {'vector': pred, 'info': "success"}
         return res, "success"
     except TFServingModel.CustomException as e:

@@ -38,7 +38,7 @@ def _predict(imgPIL):
         if len(faceArr) == 0:
             return None, "no frontal-face detected."
         else:
-            pred_list = [modelClassifier.predict(face) for face in faceArr]
+            pred_list = [np.array(modelClassifier.predict(face)) for face in faceArr]
             res_list = [{"id": int(pred.argmax()), "prob": round(float(pred.max()), 4), "info": output[int(pred.argmax())]} for pred in pred_list]
             return res_list, "success"
     except TFServingModel.CustomException as e:
