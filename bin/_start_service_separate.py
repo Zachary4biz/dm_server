@@ -46,7 +46,11 @@ def test_service(serv_name):
         zprint(">>> 测试post服务(profile), 请求url: {}".format(url))
         b = time.time()
         res = requests.post(url=url, data=post_params, timeout=60).text 
-    zprint(">>> Test on {}: [time]:{:.3f}ms [res]:{}".format(serv_name, (time.time() - b)*1000, res))
+
+    os.makedirs("./tmp_test_res",exist_ok=True)
+    with open("./tmp_test_res/test_res_{}.txt".format(serv_name),"w+") as fw:
+        fw.write(res)
+    zprint(">>> Test on {}: [time]:{:.3f}ms [res]:{}".format(serv_name, (time.time() - b)*1000, res[:300]))
     zprint("**上述计时包含了模型初始化时间**")
 
 
@@ -85,20 +89,22 @@ def start_server(serv_name):
 def start_tf_serving(serv_name):
     serv_params: ServingModelParams = CONFIG_NEW[serv_name]
     status, output = subprocess.getstatusoutput("docker ps -a | awk '{print $NF}'")
-    if serv_params.name not in output.split("\n"):
+    if serv_params.service_name not in output.split("\n"):
         zprint(">>> TFServing(docker) 未开启，将开启服务 {} 于端口 {}".format(serv_name, serv_params.tf_serving_port))
         start_cmd = f"""
             docker run -d --rm -p {serv_params.tf_serving_port}:8501 \
-                --name {serv_params.name} \
-                -v "{serv_params.pb_path}:/models/{serv_params.name}" \
-                -e MODEL_NAME={serv_params.name} \
+                --name {serv_params.service_name} \
+                -v "{serv_params.pb_path}:/models/{serv_params.service_name}" \
+                -e MODEL_NAME={serv_params.service_name} \
                 -e TF_CPP_MIN_VLOG_LEVEL={serv_params.tf_serving_loglevel} \
                 -t tensorflow/serving > {serv_params.tf_serving_logfile}  &
             """.strip()
         status, output = subprocess.getstatusoutput(start_cmd)
+        zprint(f"开启TFServing:\n{start_cmd}")
         zprint(">>> {}: subprocess status is: ' {} ', output is: ' {} '".format("SUCCESS" if status == 0 else "FAIL", status, output))
-    zprint(">>> 内部TFServing服务 {} 已启动于端口 {} ".format(serv_name, serv_params.tf_serving_port))
-
+    else:
+        zprint(">>> TFServing(docker) 已开启 {} 于端口 {} ".format(serv_name, serv_params.tf_serving_port))
+    zprint(f">>> API: {serv_params.serving_url}")
 
 if SERVICE == "all":
     assert False, "此部分逻辑已废弃"
