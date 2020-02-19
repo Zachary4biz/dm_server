@@ -24,7 +24,7 @@ if not os.path.exists(BaseLogDir):
 
 # 每个服务的参数
 class Params:
-    def __init__(self, port, service_name, timeout=6, worker_num=2, use_lazy=False):
+    def __init__(self, port, service_name, timeout=10, worker_num=2, use_lazy=False):
         # gunicorn启动server时（_start_service...）里会用到的参数
         self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
         self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
