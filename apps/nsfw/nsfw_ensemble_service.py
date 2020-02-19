@@ -19,6 +19,9 @@ import numpy as np
 import requests
 from django.http import HttpResponse
 from django.http import HttpRequest
+from nsfw import nsfw_service
+from nsfw.nsfw_obj import nsfw_obj_service
+from nsfw.nsfw_bcnn import nsfw_bcnn_service
 
 NAME = "nsfw_ensemble"
 TIMEOUT = CONFIG_NEW[NAME].timeout
@@ -29,16 +32,10 @@ logger = settings.LOGGER[NAME]
 load_img_func = cvUtil.img_from_url_cv2
 param_check_list = ['img_url', 'id']
 HOST = os.environ.get("SERVICE_HOST")
-NSFW_OBJ_NAME="nsfw_obj"
-NSFW_BCNN_NAME="nsfw_bcnn"
-sub_service_names = [NSFW_OBJ_NAME, NSFW_BCNN_NAME]
 
-from nsfw.nsfw_obj import nsfw_obj_service
-from nsfw.nsfw_bcnn import nsfw_bcnn_service
-sub_service_default = {
-    "nsfw_obj":nsfw_obj_service.get_default_res(),
-    "nsfw_bcnn":nsfw_bcnn_service.get_default_res(),
-}
+NSFW_OBJ=nsfw_obj_service
+NSFW_CLF=nsfw_service # nsfw_bcnn_service # bcnn训练的样本太少虽然在验证集表现很好，但是实际业务数据还是很多误判
+sub_services = [NSFW_OBJ, NSFW_CLF]
 
 def get_default_res(info="default res"):
     return {'nsfw_prob': -1, 'sfw_prob': -1, 'info': info}
@@ -73,16 +70,16 @@ def predict(request):
         id_ = params['id']
         # 拼接子服务的请求url
         request_urls = []
-        for name in sub_service_names:
-            port=CONFIG_NEW[name].port
-            ser_name=CONFIG_NEW[name].service_name
+        for serv in sub_services:
+            port=CONFIG_NEW[serv.NAME].port
+            ser_name=serv.NAME
             request_urls.append(f"http://{HOST}:{port}/{ser_name}?img_url={img_url}&id={id_}")
         
         # 拼接一些 request_service_http_multiProcess 必须的参数
         service_info_list=[{
-            "NAME":CONFIG_NEW[ser_name].service_name,
-            "TIMEOUT":CONFIG_NEW[ser_name].timeout,
-            "default_res":sub_service_default[ser_name]} for ser_name in sub_service_names]
+            "NAME":serv.NAME,
+            "TIMEOUT":serv.TIMEOUT,
+            "default_res":serv.get_default_res()} for serv in sub_services]
 
         # 并发请求
         p = Pool(2)
@@ -99,24 +96,32 @@ def predict(request):
                 # 失败的子服务输出日志
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{} [res]:{}".format(ser_name, id_, is_success.split("\t")[0],res))
                 logger.debug(is_success)
-                # if ser_name == NSFW_OBJ_NAME:
-                #     pass
-                # elif ser_name == NSFW_BCNN_NAME:
-                #     pass
-                # else:
-                #     assert False,f"ser_name:{ser_name} not in sub_service_names [{NSFW_OBJ_NAME}, {NSFW_BCNN_NAME}]"
             else:
                 logger.info(f"[id]:{id_} [SERVICE]:{ser_name} [delta]: {delta_t} [res]:{res}")
-                if ser_name == NSFW_OBJ_NAME:
+                if ser_name == NSFW_OBJ.NAME:
                     obj_score=max([i['prob'] for i in res]) if len(res)>0 else 0.0
+                    # 物体检测针对的是裸露器官，加上0.3在目标检测中就算是可靠阈值
+                    # 所以实际作为鉴黄分数和bcnn一起使用的时候要加倍或者其他放大方式
+                    # 这里实现方式是做了个映射obj的判定分数是0.3~1.0 这里ensemble最后的判定分数是0.85~1.0
+                    # 为了实现，obj只要检测到就认为是黄图，映射函数f为f(0.3)=0.85 & f(1.0)=f(1.0)
+                    # EDIT: 修订为f(0.3)=0.5更合理，这里只是0.3相当于bcnn里0.5的判定阈值,0.85是profile里业务取的阈值，不应该挂钩
+                    # a * obj_score + b = obj_score_new
+                    a=(1.0-0.5)/(1-nsfw_obj_service.obj_prob_hold)
+                    b=1-a
+                    obj_score_new=a*obj_score+b
+                    # 注意如果obj_score太小了，例如极端情况0时，这里还会映射为b的大小
+                    # 即一张完全正常的图什么都检测不到，也会认为其有2/7=0.286的黄图概率
+                    # 所以调整一下区间，0.1以上的时候使用 [0.3,1.0]=>[0.5,1.0] 的映射 其他时候保持原样
+                    if obj_score>=0.1:
+                        obj_score = obj_score_new
                     if  obj_score > nsfw_score:
                         nsfw_score = obj_score
-                elif ser_name == NSFW_BCNN_NAME:
-                    bcnn_score=res["nsfw_prob"]
-                    if  bcnn_score > nsfw_score:
-                        nsfw_score = bcnn_score
+                elif ser_name == NSFW_CLF.NAME:
+                    clf_score=res["nsfw_prob"]
+                    if  clf_score > nsfw_score:
+                        nsfw_score = clf_score
                 else:
-                    assert False,f"ser_name:{ser_name} not in sub_service_names [{NSFW_OBJ_NAME}, {NSFW_BCNN_NAME}]"
+                    assert False,f"ser_name:{ser_name} not in sub_service_names [{NSFW_OBJ.NAME}, {NSFW_CLF.NAME}]"
         if nsfw_score > -1:
             nsfw_score = round(float(nsfw_score), 4) 
             sfw_score = round(float(1-nsfw_score), 4)

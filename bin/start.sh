@@ -30,7 +30,7 @@ fi
 localIP="0.0.0.0"
 if [[ ${service_name} = "seq" ]]; then
     echo "执行 seq， 依次启动各个服务: "
-    allServiceStr="age,gender,nsfw_obj,nsfw_bcnn,nsfw_ensemble,obj,ethnicity,cutcut_profile"
+    allServiceStr="age,gender,nsfw_obj,nsfw,nsfw_bcnn,nsfw_ensemble,obj,ethnicity,cutcut_profile"
     allService=(${allServiceStr//,/ })
     echo "allService as :"
     for service in ${allService[@]};do echo $service;done
