@@ -88,8 +88,8 @@ def start_server(serv_name):
 
 def start_tf_serving(serv_name):
     serv_params: ServingModelParams = CONFIG_NEW[serv_name]
-    status, output = subprocess.getstatusoutput("docker ps -a | awk '{print $NF}'")
-    if serv_params.service_name not in output.split("\n"):
+    status, output = subprocess.getstatusoutput(f"docker ps -a | grep {serv_params.service_name} | grep {serv_params.tf_serving_port}")
+    if len(output)<=1:
         zprint(">>> TFServing(docker) 未开启，将开启服务 {} 于端口 {}".format(serv_name, serv_params.tf_serving_port))
         start_cmd = f"""
             docker run -d --rm -p {serv_params.tf_serving_port}:8501 \
@@ -104,6 +104,7 @@ def start_tf_serving(serv_name):
         zprint(">>> {}: subprocess status is: ' {} ', output is: ' {} '".format("SUCCESS" if status == 0 else "FAIL", status, output))
     else:
         zprint(">>> TFServing(docker) 已开启 {} 于端口 {} ".format(serv_name, serv_params.tf_serving_port))
+        zprint(">>> grep信息为: {}".format(output))
     zprint(f">>> API: {serv_params.serving_url}")
 
 if SERVICE == "all":
