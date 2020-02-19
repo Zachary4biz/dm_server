@@ -50,7 +50,7 @@ def test_service(serv_name):
     os.makedirs("./tmp_test_res",exist_ok=True)
     with open("./tmp_test_res/test_res_{}.txt".format(serv_name),"w+") as fw:
         fw.write(res)
-    zprint(">>> Test on {}: [time]:{:.3f}ms [res]:{}".format(serv_name, (time.time() - b)*1000, res[:300]))
+    zprint(">>> Test on {}: [time]:{:.3f}ms [res]:{}".format(serv_name, (time.time() - b)*1000, res[:600]))
     zprint("**上述计时包含了模型初始化时间**")
 
 
