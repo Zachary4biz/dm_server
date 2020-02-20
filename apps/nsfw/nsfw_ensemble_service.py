@@ -35,7 +35,7 @@ HOST = os.environ.get("SERVICE_HOST")
 
 NSFW_OBJ=nsfw_obj_service
 NSFW_CLF=nsfw_service # nsfw_bcnn_service # bcnn训练的样本太少虽然在验证集表现很好，但是实际业务数据还是很多误判
-sub_services = [NSFW_OBJ, NSFW_CLF]
+sub_services = [NSFW_CLF] # [NSFW_OBJ, NSFW_CLF]
 
 def get_default_res(info="default res"):
     return {'nsfw_prob': -1, 'sfw_prob': -1, 'info': info}
