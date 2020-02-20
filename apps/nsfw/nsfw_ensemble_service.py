@@ -59,10 +59,6 @@ def request_service_http_multiProcess(zipped_param):
 
 
 def predict(request):
-    # return api_format_predict(request,
-    #                           logger=logger, param_check_list=param_check_list,
-    #                           load_img_func=load_img_func, get_default_res=get_default_res, _predict=_predict,
-    #                           TIMEOUT=CONFIG_NEW[NAME].timeout)
     begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):
@@ -128,7 +124,7 @@ def predict(request):
             res=[sfw_score, nsfw_score]
             res_dict={'nsfw_prob': res[1], 'sfw_prob': res[0], 'info': output[np.argmax(res)]}
         else:
-            res_dict=get_default_res("both bcnn&yolo failed")
+            res_dict=get_default_res("both clf&obj failed")
         json_str = json.dumps({"result":res_dict})
 
         total_delta = round(time.time() - begin, 5) * 1000
