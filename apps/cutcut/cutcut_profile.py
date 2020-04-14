@@ -12,6 +12,7 @@ import requests
 from age import age_service
 from gender import gender_service
 # from nsfw import nsfw_service
+from nonage import nonage_service
 from nsfw import nsfw_ensemble_service
 from obj_detection import yolo_service
 from ethnicity import ethnicity_service
@@ -26,6 +27,7 @@ from django.conf import settings
 NAME = "cutcut_profile"
 logger = settings.LOGGER[NAME]
 nsfw_threshold = 0.8
+nonage_threshold = 0.5
 
 
 def request_kw(text, is_title=True):
@@ -85,6 +87,7 @@ def request_service_http_multiProcess(zipped_param):
 
 
 # inplace and return
+# nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
 def update_nsfw(inp_res, key="nsfw", inplace=True):
     inp_nsfw, nsfw_time, nsfw_success = inp_res[key]
     if inp_nsfw['nsfw_prob'] >= nsfw_threshold:
@@ -96,7 +99,7 @@ def update_nsfw(inp_res, key="nsfw", inplace=True):
         nsfw_res = {'id': -1, 'prob': 1.0, 'info': inp_nsfw['info']}
     else:
         nsfw_res = {'id': 0, 'prob': inp_nsfw['sfw_prob'], 'info': 'normal pic'}
-    
+
     if inplace:
         inp_res.update({key: (nsfw_res, nsfw_time, nsfw_success)})
         return inp_res
@@ -127,33 +130,13 @@ def profile_direct_api(request):
         inner_request.method = "GET"
         inner_request.GET = {"img_url": img_url, "id": id_}
 
-        # nsfw_res, nsfw_time = request_service_thread_timeout(nsfw_service, inner_request)
-        # age_res, age_time = request_service_thread_timeout(age_service, inner_request)
-        # gender_res, gender_time = request_service_thread_timeout(gender_service, inner_request)
-        # yolo_res, yolo_time = request_service_thread_timeout(yolo_service, inner_request)
-
-        # nsfw_res, nsfw_time = request_service(nsfw_service, inner_request)
-        # age_res, age_time = request_service(age_service, inner_request)
-        # gender_res, gender_time = request_service(gender_service, inner_request)
-        # yolo_res, yolo_time = request_service_process_timeout(yolo_service, inner_request)
-        # yolo_res, yolo_time = yolo_service.get_default_res(), 0
-
-        # nsfw_res, nsfw_time = request_service_http(nsfw_service, inner_request)
-        # age_res, age_time = request_service_http(age_service, inner_request)
-        # gender_res, gender_time = request_service_http(gender_service, inner_request)
-        # yolo_res, yolo_time = request_service_http(yolo_service, inner_request)
-
-        # class abc():
-        #     def __init__(self):
-        #         self.GET={"img_url": img_url, "id": id_}
-        # inner_request = abc()
-
         p = Pool(4)
-        service_list_ = [nsfw_ensemble_service, age_service, gender_service, yolo_service, ethnicity_service]
+        service_list_ = [nsfw_ensemble_service, nonage_service, age_service, gender_service, yolo_service, ethnicity_service]
         service_list = [{'NAME': i.NAME, 'TIMEOUT': i.TIMEOUT, 'default_res': i.get_default_res()} for i in service_list_]
         url_list = ["http://{}:{}/{}?img_url={}&id={}".format(HOST, CONFIG_NEW[service['NAME']].port, service['NAME'], img_url, id_) for service in service_list]*len(service_list)
         r = p.map(func=request_service_http_multiProcess, iterable=list(zip(service_list, url_list)))
-        result = dict(zip([i['NAME'] for i in service_list], r))  # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
+        # 多进程结果顺序和输入服务的顺序一样，zip到一起避免后续取数据的时候出错
+        result = dict(zip([i['NAME'] for i in service_list], r))
         p.close()
         p.join()
         # 取出标记检查是否为success
@@ -163,27 +146,38 @@ def profile_direct_api(request):
                 # print(is_success)
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
-        # 根据阈值nsfw_threshold更新result里nsfw的结果
-        # 并取出nsfw的阈值判断是否为黄图，用于更新review_status
-        nsfw_res, nsfw_time, nsfw_success = update_nsfw(result, key=nsfw_ensemble_service.NAME,inplace=True)[nsfw_ensemble_service.NAME]
-        # nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
-        is_nsfw = 1 if nsfw_res['id'] == 1 and nsfw_res['prob'] >= nsfw_threshold else 0  # 异常时填充值为 id:-1,prob:1.0
-        sub_service_time = " + ".join([f"{i['NAME']}:{result[i['NAME']][1]:.2f}ms" for i in service_list])
+        # 根据阈值nsfw_threshold更新result里nsfw的结果 
+        update_nsfw(result, key=nsfw_ensemble_service.NAME,inplace=True)
+        nsfw_res, _, _ = result[nsfw_ensemble_service.NAME]
+        nonage_res,_,_ = result[nonage_service.NAME]
+        # 更新review_status 
+        if nsfw_res['id'] == 1:
+            # 色情图片下线
+            res_dict.update({"review_status": [1]})
+        elif nonage_res['rate'] >= nonage_threshold:
+            # 未成年人先发后审
+            res_dict.update({"review_status": [2]})
+        else:
+            # 其他不做review
+            res_dict.update({"review_status": [0]})
 
-        # get NLP features
-        nlp_res_dict = request_nlp(title, desc)
+        # 如果id标记为-1表示nsfw检测服务异常了，这类图标记为先发后审
+        if nsfw_res['id'] == -1:
+            res_dict.update({"review_status": [2]})
 
         res_dict.update({info['NAME']: result[info['NAME']][0] for info in service_list})
-        res_dict.update({"review_status": [is_nsfw]})
-        if nsfw_res['id'] == -1:
-            res_dict.update({"review_status": [2]})  # 如果id标记为-1表示nsfw检测服务异常了，这类图标记为先发后审
+        # get NLP features
+        nlp_res_dict = request_nlp(title, desc)
         res_dict.update(nlp_res_dict)
         final_status = "success" if all(i == "success" for i in [is_success for k, (res, delta_t, is_success) in result.items()]) else "fail"
         res_dict.update({"status": final_status})
+        # 'nsfw_ensemble'键名替换为'nsfw'，兼容历史下游服务
         res_dict['nsfw']=res_dict.pop(nsfw_ensemble_service.NAME)
+        # 最终json结果
         res_jsonstr = json.dumps(res_dict)
+        # 计时与日志
         total_time = round(time.time() - begin, 5) * 1000
-
+        sub_service_time = " + ".join([f"{i['NAME']}:{result[i['NAME']][1]:.2f}ms" for i in service_list])
         logger.info(f"[id]: {id_} [img_url]: {unquote(img_url)} [res]: {res_jsonstr} [elapsed]: total:{total_time:.2f}ms = {sub_service_time}")
 
         return HttpResponse(res_jsonstr, status=200, content_type="application/json,charset=utf-8")
