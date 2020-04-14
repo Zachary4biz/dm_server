@@ -123,7 +123,8 @@ else:
                                         service_module_dir=os.path.dirname(nsfw_bcnn.__file__),
                                         tf_serving_port=18054, tf_serving_loglevel=0,
                                         timeout=10, worker_num=4),
-        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",worker_num=5),
+        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",timeout=10,worker_num=2),
+        'nonage': Params(port=8010, service_name="nonage",timeout=5,worker_num=4),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=2),
     }
     allP=[v for k,v in CONFIG_NEW.items()]

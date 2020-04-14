@@ -20,6 +20,7 @@ if [[ ! -n "${service_name}" ]]; then
     echo " nsfw_obj        |8007|         开启 [鉴黄obj] 服务"
     echo " nsfw_bcnn       |8008|         开启 [鉴黄bcnn] 服务"
     echo " nsfw_ensemble   |8009|         开启 [鉴黄总承] 服务"
+    echo " nonage          |8010|         开启 [未成年人检测] 服务"
     echo " cutcut_profile  |8000|         开启 [画像总承] 服务"
     exit 1
 else
@@ -30,7 +31,7 @@ fi
 localIP="0.0.0.0"
 if [[ ${service_name} = "seq" ]]; then
     echo "执行 seq， 依次启动各个服务: "
-    allServiceStr="age,gender,nsfw_obj,nsfw,nsfw_bcnn,nsfw_ensemble,obj,ethnicity,cutcut_profile"
+    allServiceStr="age,gender,nsfw_obj,nsfw,nsfw_bcnn,nsfw_ensemble,nonage,obj,ethnicity,cutcut_profile"
     allService=(${allServiceStr//,/ })
     echo "allService as :"
     for service in ${allService[@]};do echo $service;done
