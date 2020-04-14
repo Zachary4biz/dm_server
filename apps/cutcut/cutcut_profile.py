@@ -26,7 +26,7 @@ from django.conf import settings
 
 NAME = "cutcut_profile"
 logger = settings.LOGGER[NAME]
-nsfw_threshold = 0.8
+nsfw_threshold = 0.7
 nonage_threshold = 0.5
 
 
