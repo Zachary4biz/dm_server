@@ -87,7 +87,7 @@ def request_service_http_multiProcess(zipped_param):
 
 
 # inplace and return
-# nsfw的结果要多处理一层：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
+# nsfw 的结果要根据阈值判断：{'nsfw_prob': 0.89, 'sfw_prob': 0.11} ==> {'id':1, 'prob':0.89, 'info':'nsfw pic'}
 def update_nsfw(inp_res, key="nsfw", inplace=True):
     inp_nsfw, nsfw_time, nsfw_success = inp_res[key]
     if inp_nsfw['nsfw_prob'] >= nsfw_threshold:
@@ -106,6 +106,28 @@ def update_nsfw(inp_res, key="nsfw", inplace=True):
     else:
         inp_res_ = copy.deepcopy(inp_res)
         inp_res_.update({key: (nsfw_res, nsfw_time, nsfw_success)})
+        return inp_res_
+
+# nonage 的结果要根据阈值判断：{'rate': 0.89, 'info':"nonage"} ==> {'id':1, 'prob':0.89, 'info':'nonage pic'}
+def update_nonage(inp_res, key="nonage", inplace=True):
+    inp_nonage, nonage_time, nonage_success = inp_res[key]
+    if inp_nonage['rate'] >= nonage_threshold:
+        # 只有超过阈值(0.5)才在结果中展示为nonage pic
+        nonage_res = {'id': 1, 'prob': inp_nonage['rate'], 'info': 'nonage pic'}
+    elif inp_nonage['rate'] == -1:
+        # 返回的是默认值，说明请求异常
+        nonage_success = "fail"
+        nonage_res = {'id': -1, 'prob': 1.0, 'info': inp_nonage['info']}
+    else:
+        # 正常图片非未成年
+        nonage_res = {'id': 0, 'prob': 0.0, 'info': 'not nonage'}
+
+    if inplace:
+        inp_res.update({key: (nonage_res, nonage_time, nonage_success)})
+        return inp_res
+    else:
+        inp_res_ = copy.deepcopy(inp_res)
+        inp_res_.update({key: (nonage_res, nonage_time, nonage_success)})
         return inp_res_
 
 
@@ -147,10 +169,11 @@ def profile_direct_api(request):
                 logger.error("[SERVICE]:{} [id]:{} [ERR]:{}".format(k, id_, is_success.split("\t")[0]))
                 logger.debug(is_success)
         # 根据阈值nsfw_threshold更新result里nsfw的结果 
-        update_nsfw(result, key=nsfw_ensemble_service.NAME,inplace=True)
+        update_nsfw(result, key=nsfw_ensemble_service.NAME, inplace=True)
+        update_nonage(result, key=nonage_service.NAME, inplace=True)
         nsfw_res, _, _ = result[nsfw_ensemble_service.NAME]
         nonage_res,_,_ = result[nonage_service.NAME]
-        # 更新review_status 
+        # 更新review_status
         if nsfw_res['id'] == 1:
             # 色情图片下线
             res_dict.update({"review_status": [1]})
