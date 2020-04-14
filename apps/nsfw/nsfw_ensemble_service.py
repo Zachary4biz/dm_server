@@ -9,6 +9,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import CONFIG_NEW  # config的依赖路径在cofnig.py里已经默认添加
 from util.cv_util import CVUtil
+from util.tupu import TupuReq
 from django.conf import settings
 from services import api_format_predict
 from urllib.parse import quote, unquote, urlparse, urlencode
@@ -25,11 +26,10 @@ from nsfw.nsfw_bcnn import nsfw_bcnn_service
 
 NAME = "nsfw_ensemble"
 TIMEOUT = CONFIG_NEW[NAME].timeout
-output = ['normal pic', 'nsfw pic']
+output = ['normal pic', 'nsfw pic', 'sexy pic']
 cvUtil = CVUtil()
+tupuReq = TupuReq()
 logger = settings.LOGGER[NAME]
-# modelClassifier = settings.ALGO_MODEL[NAME]
-load_img_func = cvUtil.img_from_url_cv2
 param_check_list = ['img_url', 'id']
 HOST = os.environ.get("SERVICE_HOST")
 
@@ -57,8 +57,37 @@ def request_service_http_multiProcess(zipped_param):
     delta_t = round(time.time() - begin, 5) * 1000
     return res, delta_t, is_success
 
-
 def predict(request):
+    begin = time.time()
+    params = request.GET
+    if all(i in params for i in param_check_list):
+        img_url = unquote(params['img_url'])
+        id_ = params['id']
+        # 请求第三方服务
+        porn_lbl,lbl_rate,state=tupuReq.request_porn(img_url)
+        if state == "success":
+            # label: 0 色情 露点、生殖器官、性行为等
+            if porn_lbl == 0:
+                res_dict={'nsfw_prob': lbl_rate, 'sfw_prob': 1-lbl_rate, 'info': output[1]}
+            # label: 1 性感 露肩、露大腿、露沟等
+            elif porn_lbl == 1:
+                res_dict={'nsfw_prob': 1-lbl_rate, 'sfw_prob': lbl_rate, 'info': output[2]}
+            else:
+                res_dict={'nsfw_prob': 1-lbl_rate, 'sfw_prob': lbl_rate, 'info': output[0]}
+        else:
+            res_dict = get_default_res(state)
+        json_str = json.dumps({"result":res_dict})
+        # 超时检测
+        total_delta = round(time.time() - begin, 5) * 1000
+        logger.info(f"[id]: {params['id']} [img_url]: {img_url} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms")
+        if total_delta > TIMEOUT*1000:
+            logger.error(f"[TIMEOUT] [id]: {params['id']} [img_url]: {img_url} [res]: {json_str} [ELA-total]: {total_delta:.2f}ms")
+        return HttpResponse(json_str, status=200, content_type="application/json,charset=utf-8")
+    else:
+        return HttpResponse("use GET, param: '{}'".format(",".join(param_check_list)), status=400)
+
+# custom模型弃用，使用图普/网易提供的第三方鉴黄
+def predict_(request):
     begin = time.time()
     params = request.GET
     if all(i in params for i in param_check_list):

@@ -26,8 +26,10 @@ from config import CONFIG_NEW, ServingModelParams
 
 def test_service(serv_name):
     PORT = CONFIG_NEW[serv_name].port
+    test_img_url = "https://static.xprodev.com/imageView2/material/872d563e/201910/302103/2267895358_1572440586674.jpg"
+    # test_img_url = "http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg"
     post_params = {
-        'img_url': 'http://scd.cn.rfi.fr/sites/chinese.filesrfi/dynimagecache/0/0/660/372/1024/578/sites/images.rfi.fr/files/aef_image/_98711473_042934387-1.jpg',
+        'img_url': test_img_url,
         'id': -1,
         'title': 'FM明星大片',
         'description': 'Rihanna以唐朝风发髻和妆容登上中国版BAZAAR 8月上封面，日日不愧是“山东人，扮起唐装一点也不违和😁'
