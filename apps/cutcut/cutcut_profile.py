@@ -177,7 +177,7 @@ def profile_direct_api(request):
         if nsfw_res['id'] == 1:
             # 色情图片下线
             res_dict.update({"review_status": [1]})
-        elif nonage_res['rate'] >= nonage_threshold:
+        elif nonage_res['id'] == 1:
             # 未成年人先发后审
             res_dict.update({"review_status": [2]})
         else:
