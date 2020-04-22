@@ -22,7 +22,7 @@ class TaskId():
 class TupuReq(object):
     def __init__(self):
         self.secretID="563883b50e4f58f951a06d8e"
-        self.api_url = f'http://api.open.tuputech.com/v3/recognition/{self.secretID}'
+        self.api_url = f'http://api-us.open.tuputech.com/v3/recognition/{self.secretID}'
         self.privatekey="""-----BEGIN RSA PRIVATE KEY-----
         MIICWwIBAAKBgQCrzaze0785P3Mpty9urItTKRBE/eVLvikzC/f4kJtT51PL3sSX
         S7Wrn7xoQJnRCkrYjB6wr19grFyNTgnTGT+/yYyL0aGzE8SaR0ZzbTkIgZbQd+/G
