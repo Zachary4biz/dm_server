@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import CONFIG_NEW  # config的依赖路径在cofnig.py里已经默认添加
 from util.cv_util import CVUtil
 from util.tupu import TupuReq
+from util.netease import NeteaseReq
 from django.conf import settings
 from services import api_format_predict
 from urllib.parse import quote, unquote, urlparse, urlencode
@@ -28,7 +29,7 @@ NAME = "nsfw_ensemble"
 TIMEOUT = CONFIG_NEW[NAME].timeout
 output = ['normal pic', 'nsfw pic', 'sexy pic']
 cvUtil = CVUtil()
-tupuReq = TupuReq()
+neteaseReq = NeteaseReq()
 logger = settings.LOGGER[NAME]
 param_check_list = ['img_url', 'id']
 HOST = os.environ.get("SERVICE_HOST")
@@ -64,16 +65,16 @@ def predict(request):
         img_url = unquote(params['img_url'])
         id_ = params['id']
         # 请求第三方服务
-        porn_lbl,lbl_rate,state=tupuReq.request_porn(img_url)
+        porn_lbl,lbl_rate,state=neteaseReq.request_porn(img_url)
         if state == "success":
-            # label: 0 色情 露点、生殖器官、性行为等
+            # label: 网易是 0 正常图片 | 图谱是：色情 露点、生殖器官、性行为等
             if porn_lbl == 0:
-                res_dict={'nsfw_prob': lbl_rate, 'sfw_prob': 1-lbl_rate, 'info': output[1]}
-            # label: 1 性感 露肩、露大腿、露沟等
-            elif porn_lbl == 1:
-                res_dict={'nsfw_prob': 1-lbl_rate, 'sfw_prob': lbl_rate, 'info': output[2]}
-            else:
                 res_dict={'nsfw_prob': 1-lbl_rate, 'sfw_prob': lbl_rate, 'info': output[0]}
+            # label: 网易是 1 or 2 色情图片 | 图谱是 性感 露肩、露大腿、露沟等
+            elif porn_lbl in [1,2]:
+                res_dict={'nsfw_prob': lbl_rate, 'sfw_prob': 1-lbl_rate, 'info': output[1]}
+            else:
+                assert(False,"porn_lbl is '%s' , it should only has three stat as 0,1,2" % porn_lbl)
         else:
             res_dict = get_default_res(state)
         json_str = json.dumps({"result":res_dict})
