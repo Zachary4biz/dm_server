@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import CONFIG_NEW  # config的依赖路径在cofnig.py里已经默认添加
 from util.cv_util import CVUtil
-from util.tupu import TupuReq
+# from util.tupu import TupuReq as NeteaseReq
 from util.netease import NeteaseReq
 from django.conf import settings
 from services import api_format_predict
@@ -67,10 +67,10 @@ def predict(request):
         # 请求第三方服务
         porn_lbl,lbl_rate,state=neteaseReq.request_porn(img_url)
         if state == "success":
-            # label: 网易是 0 正常图片 | 图谱是：色情 露点、生殖器官、性行为等
+            # label: 0 是正常图片(第三方服务已经经过映射) | 网易是 0 正常图片 | 图谱是：色情 露点、生殖器官、性行为等
             if porn_lbl == 0:
                 res_dict={'nsfw_prob': 1-lbl_rate, 'sfw_prob': lbl_rate, 'info': output[0]}
-            # label: 网易是 1 or 2 色情图片 | 图谱是 性感 露肩、露大腿、露沟等
+            # label: 1 or 2 是色情(第三方服务已经经过映射) | 网易是 1 or 2 色情图片 | 图谱是 1 是性感 露肩、露大腿、露沟等 2是正常
             elif porn_lbl in [1,2]:
                 res_dict={'nsfw_prob': lbl_rate, 'sfw_prob': 1-lbl_rate, 'info': output[1]}
             else:

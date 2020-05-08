@@ -69,6 +69,9 @@ class TupuReq(object):
     
     # label: 0 色情 露点、生殖器官、性行为等
     # label: 1 性感 露肩、露大腿、露沟等
+    # label: 2 正常
+    # 重新映射为 0是正常(2,1->0)，1是色情(0->1)
+    remap={0:1,1:0,2:0}
     def request_porn(self,pic_url):
         res=self.request(pic_url,tasks=[TaskId.porn])
         if res.status_code == 200:
@@ -82,6 +85,7 @@ class TupuReq(object):
                 label  = -1
                 rate = 0.0
                 state = json.loads(jsonPart)['message']
+        label = self.remap.get(label,label)
         return label,rate,state
 
 
@@ -103,5 +107,8 @@ class TupuReq(object):
 if __name__ == "__main__":
     tupuReq = TupuReq()
     pic_url="https://static.picku.cloud/imageView2/material/7ad3fc32/202002/261211/0cce922725f047f9b9ad0e2e19bf06a9.jpg"
-    porn_lbl,porn_rate=tupuReq.request_porn(pic_url)
-    child_lbl,child_rate=tupuReq.request_vulgar(pic_url)
+    pic_url = "https://static.picku.cloud/imageView2/material/7ad3fc32/202005/062139/a00ab025d3ae4cbca078f813c7b2af9a.jpg"
+    # porn_lbl,porn_rate=tupuReq.request_porn(pic_url)
+    print(tupuReq.request_porn(pic_url))
+    # child_lbl,child_rate=tupuReq.request_vulgar(pic_url)
+    print(tupuReq.request_vulgar(pic_url))
