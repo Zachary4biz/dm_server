@@ -91,8 +91,15 @@ if __name__ == "__main__":
     api = NeteaseReq()
     # pornpics_kid: 
     img_url = "https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202001/070306/5fd42f9e4d55461790af4c0ddf917d30.jpg"
+    img_url = "https://static.picku.cloud/imageView2/material/7ad3fc32/202005/061750/9f2054af0e26486fbc64f82a1a94567b.jpg"
+    print(">>> request_porn:")
     print(api.request_porn(img_url))
+    print(">>> check:")
+    images = [{"name":img_url, "type":1, "data":img_url}]
+    params = {"images": json.dumps(images)}
+    print(api.check(params))
 
+    exit(0)
     # @deprecated
     # fp="/Users/zac/Downloads/porn_pics_kids.txt"
     fp="/Users/zac/Downloads/porn_urls_distinct.txt"
