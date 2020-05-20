@@ -65,6 +65,10 @@ class TupuReq(object):
                 label  = -1
                 rate = 0.0
                 state = json.loads(jsonPart)['message']
+        else:
+            label=-1
+            rate=0.0
+            state="status_code as {}".format(res.status_code)
         return label,rate,state
     
     # label: 0 色情 露点、生殖器官、性行为等

@@ -82,6 +82,10 @@ class NeteaseReq(object):
                 rate = 0.0
                 # porn_res里应该是有label为100的，这个是色情检测的服务编号，没有它是异常情况
                 state = str(porn_res)
+        else:
+            label=-1
+            rate=0.0
+            state="status_code as {}".format(res_dict['code'])
         return label,rate,state
 
 
