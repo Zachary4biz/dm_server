@@ -56,19 +56,27 @@ class TupuReq(object):
         res=self.request(pic_url,tasks=[TaskId.vulgar])
         if res.status_code == 200:
             jsonPart=json.loads(res.text)['json']
-            try:
-                vulgarRes=json.loads(jsonPart)[TaskId.vulgar]
-                label=vulgarRes['fileList'][0]['label']
-                rate=vulgarRes['fileList'][0]['rate']
-                state = "success"
-            except:
-                label  = -1
-                rate = 0.0
-                state = json.loads(jsonPart)['message']
+            if json.loads(jsonPart)['code'] == 0:
+                try:
+                    vulgarRes=json.loads(jsonPart)[TaskId.vulgar]
+                    label=vulgarRes['fileList'][0]['label']
+                    rate=vulgarRes['fileList'][0]['rate']
+                    state = "success"
+                except:
+                    label  = -1
+                    rate = 0.0
+                    state = json.loads(jsonPart)['message']
+            else:
+                # code非0时的含义参考： http://cloud.doc.tuputech.com/commonReference/serviceCodes.html
+                label=-1
+                rate=0.0
+                # 请求服务接口时出现异常（如超时等）
+                state="tupu detection fail code as {}".format(json.loads(jsonPart)['code'])
         else:
             label=-1
             rate=0.0
-            state="status_code as {}".format(res.status_code)
+            # 请求服务接口时出现异常（如超时等）
+            state="request api status_code as {}".format(res.status_code)
         return label,rate,state
     
     # label: 0 色情 露点、生殖器官、性行为等

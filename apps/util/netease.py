@@ -69,23 +69,31 @@ class NeteaseReq(object):
         res_dict = self.check(params)
         if res_dict['code'] == 200:
             # res_dict示例:  {'code': 200, 'msg': 'ok', 'antispam': [{'taskId': '85500f51b20a4d0487d631d4639d432d', 'status': 0, 'action': 0, 'censorType': 0, 'name': 'https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202002/112053/2f605524e3c14d6bb127330f278c8418.jpg', 'labels': [{'label': 100, 'level': 0, 'rate': 0.9988005, 'subLabels': []}, {'label': 110, 'level': 0, 'rate': 0.9985179, 'subLabels': []}, {'label': 900, 'level': 0, 'rate': 1.0, 'subLabels': []}]}], 'ocr': [{'taskId': '85500f51b20a4d0487d631d4639d432d', 'name': 'https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202002/112053/2f605524e3c14d6bb127330f278c8418.jpg', 'details': []}], 'face': [{'taskId': '85500f51b20a4d0487d631d4639d432d', 'name': 'https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202002/112053/2f605524e3c14d6bb127330f278c8418.jpg', 'details': []}], 'quality': [{'taskId': '85500f51b20a4d0487d631d4639d432d', 'name': 'https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202002/112053/2f605524e3c14d6bb127330f278c8418.jpg', 'details': []}]}
-            res = res_dict['antispam'][0]['labels']
-            porn_res = [i for i in res if i['label']==100]
-            try:
-                pornRes=porn_res[0] if len(porn_res)>0 else {'level':0,'rate':1.0}
-                label=pornRes['level']
-                # level: 0：正常(图片)，1：不确定(的色情图片)，2：确定(的色情图片)
-                rate=pornRes['rate']
-                state = "success"
-            except:
-                label  = -1
-                rate = 0.0
-                # porn_res里应该是有label为100的，这个是色情检测的服务编号，没有它是异常情况
-                state = str(porn_res)
+            if res_dict['antispam'][0]['status'] == 0:
+                res = res_dict['antispam'][0]['labels']
+                porn_res = [i for i in res if i['label']==100]
+                try:
+                    pornRes=porn_res[0] if len(porn_res)>0 else {'level':0,'rate':1.0}
+                    label=pornRes['level']
+                    # level: 0：正常(图片)，1：不确定(的色情图片)，2：确定(的色情图片)
+                    rate=pornRes['rate']
+                    state = "success"
+                except:
+                    label=-1
+                    rate=0.0
+                    # porn_res里应该是有label为100的，这个是色情检测的服务编号，没有它是异常情况
+                    state = str(porn_res)
+            else:
+                # 服务加载图片url时异常
+                # antispam下的status字段是图片检测状态码，定义为：0：检测成功，610：图片下载失败，620：图片格式错误，630：其它
+                label=-1
+                rate=1.0
+                state="netease detection fail,status as {}".format(res_dict['antispam'][0]['status'])
         else:
+            # 请求服务接口时出现异常（如超时等）
             label=-1
-            rate=0.0
-            state="status_code as {}".format(res_dict['code'])
+            rate=1.0
+            state="request api status_code as {}".format(res_dict['code'])
         return label,rate,state
 
 
@@ -96,6 +104,7 @@ if __name__ == "__main__":
     # pornpics_kid: 
     img_url = "https://thumbor.apusapps.com/imageView2/material/7ad3fc32/202001/070306/5fd42f9e4d55461790af4c0ddf917d30.jpg"
     img_url = "https://static.picku.cloud/imageView2/material/7ad3fc32/202005/061750/9f2054af0e26486fbc64f82a1a94567b.jpg"
+    img_url= "https://abcd"
     print(">>> request_porn:")
     print(api.request_porn(img_url))
     print(">>> check:")

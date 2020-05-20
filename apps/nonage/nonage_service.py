@@ -33,7 +33,7 @@ HOST = os.environ.get("SERVICE_HOST")
 
 
 def get_default_res(info="default res"):
-    return {'nonage': -1, 'rate':1.0, 'info': info}
+    return {'nonage': -1, 'rate':-1.0, 'info': info}
 
 
 def predict(request):
