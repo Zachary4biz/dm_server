@@ -77,6 +77,7 @@ def predict(request):
                 assert(False,"porn_lbl is '%s' , it should only has three stat as 0,1,2" % porn_lbl)
         else:
             res_dict = get_default_res(state)
+            logger.error(f"[ERROR] [id]: {params['id']} [img_url]: {img_url} [err]: {state}")
         json_str = json.dumps({"result":res_dict})
         # 超时检测
         total_delta = round(time.time() - begin, 5) * 1000
