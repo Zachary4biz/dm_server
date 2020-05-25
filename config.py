@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(__file__))
 from apps import *
 from apps.nsfw import nsfw_bcnn,nsfw_obj
 from apps.util import model_util
-from apps.util.logger import Logger
+from apps.util.logger import Logger,KafkaLoggingHandler
 BaseDir = os.path.dirname(__file__)
 BaseLogDir = os.path.dirname(os.path.abspath(__file__))+"/logs"
 TFServingPort=8501
@@ -24,7 +24,7 @@ if not os.path.exists(BaseLogDir):
 
 # 每个服务的参数
 class Params:
-    def __init__(self, port, service_name, timeout=10, worker_num=2, use_lazy=False):
+    def __init__(self, port, service_name, timeout=10, worker_num=2, use_lazy=False,kafka_topic=None):
         # gunicorn启动server时（_start_service...）里会用到的参数
         self.host_logfile = BaseLogDir + f"/localhost_{service_name}.log"
         self.gunicorn_logfile = BaseLogDir + f"/gunicorn_{service_name}.log"
@@ -38,6 +38,8 @@ class Params:
         # 是否使用懒加载初始化各个子服务？一般都不考虑使用懒加载，避免加载过程中来的请求全都超时了
         self.use_lazy = use_lazy
         self.logger = Logger(loggername=service_name, log2console=False, log2file=True, logfile=self.service_logfile).get_logger()
+        if kafka_topic is not None:
+            self.logger.addHandler(KafkaLoggingHandler(kafka_topic))
         self.service_name = service_name
 
     def load_model(self):
@@ -123,8 +125,8 @@ else:
                                         service_module_dir=os.path.dirname(nsfw_bcnn.__file__),
                                         tf_serving_port=18054, tf_serving_loglevel=0,
                                         timeout=10, worker_num=4),
-        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",timeout=10,worker_num=4),
-        'nonage': Params(port=8010, service_name="nonage",timeout=10,worker_num=4),
+        'nsfw_ensemble': Params(port=9009, service_name="nsfw_ensemble",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.netease.nsfw"),
+        'nonage': Params(port=9010, service_name="nonage",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.tupu.nonage"),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=2),
     }
     allP=[v for k,v in CONFIG_NEW.items()]

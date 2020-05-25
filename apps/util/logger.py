@@ -14,11 +14,44 @@ import datetime
 import os
 from os.path import dirname
 from pytz import timezone
+from kafka import KafkaProducer
 
 DEFAULT_LOGGING_LEVEL = logging.INFO
 
 
 # DEFAULT_LOGGING_LEVEL = logging.DEBUG
+
+
+class KafkaLoggingHandler(logging.Handler):
+    BOOTSTRAP='datanode001.eq-sg-2.apus.com:9092,datanode002.eq-sg-2.apus.com:9092,datanode003.eq-sg-2.apus.com:9092,datanode004.eq-sg-2.apus.com:9092,datanode005.eq-sg-2.apus.com:9092,datanode006.eq-sg-2.apus.com:9092,datanode007.eq-sg-2.apus.com:9092,datanode008.eq-sg-2.apus.com:9092,datanode009.eq-sg-2.apus.com:9092,datanode010.eq-sg-2.apus.com:9092'
+    # TUPU_TOPIC="apus.three.call.log.tupu.nonage"
+    # NETEASE_TOPIC="apus.three.call.log.netease.nsfw"
+    def __init__(self,topic):
+        logging.Handler.__init__(self)
+        # kafka producer
+        self.producer = KafkaProducer(bootstrap_servers=self.BOOTSTRAP)
+        self.topic = topic
+        logging.Formatter.converter = Logger.beijing
+        formatstr = '|%(asctime)s| [%(thread)d] [%(levelname)s] [%(filename)s-%(lineno)d] %(message)s'
+        formatter = logging.Formatter(formatstr, "%Y-%m-%d %H:%M:%S")
+        self.setFormatter(formatter)
+
+    def emit(self, record):
+        #drop kafka logging to avoid infinite recursion
+        if record.name == 'kafka':
+            return
+        try:
+            #use default formatting
+            msg = self.format(record)
+            self.producer.send(self.topic, bytearray(msg,'utf-8'))
+        except:
+            import traceback
+            ei = sys.exc_info()
+            traceback.print_exception(ei[0], ei[1], ei[2], None, sys.stderr)
+            del ei
+
+    def close(self):
+        logging.Handler.close(self)
 
 
 class Logger(object):
@@ -28,7 +61,7 @@ class Logger(object):
     def __init__(self, loggername,
                  loglevel2console=DEFAULT_LOGGING_LEVEL,
                  loglevel2file=DEFAULT_LOGGING_LEVEL,
-                 log2console=True, log2file=False, logfile=None, logfile_err="auto", formatstr=None):
+                 log2console=True, log2file=False, logfile=None, logfile_err="auto", kafka_topic=None, formatstr=None):
         """Logger initialization
         Args:
             loggername: Logger name, the same name gets the same logger instance
@@ -82,6 +115,8 @@ class Logger(object):
                 fh_err.addFilter(err_filter)
                 self.logger.addHandler(fh_err)
             self.logger.addHandler(fh_defualt)
+        if kafka_topic is not None:
+            self.logger.addHandler(KafkaLoggingHandler(kafka_topic))
 
     def get_logger(self):
         return self.logger
@@ -94,8 +129,10 @@ class Logger(object):
 
 if __name__ == '__main__':
     # logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile="abcd.log").get_logger()
-    logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile="abcd.log",
-                    logfile_err="abcd_err.log").get_logger()
+    # logger = Logger('cutcut_profile', log2console=False, log2file=True, logfile="abcd.log",
+    #                 logfile_err="abcd_err.log").get_logger()
+    logger = Logger('cc',log2console=True,log2file=False,kafka_topic="apus.three.call.log.netease.nsfw").get_logger()
+    # logger.addHandler(KafkaLoggingHandler("apus.three.call.log.netease.nsfw"))
     logger.debug("a debug")
     logger.info("an info")
     logger.error("an error")
