@@ -125,8 +125,8 @@ else:
                                         service_module_dir=os.path.dirname(nsfw_bcnn.__file__),
                                         tf_serving_port=18054, tf_serving_loglevel=0,
                                         timeout=10, worker_num=4),
-        'nsfw_ensemble': Params(port=9009, service_name="nsfw_ensemble",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.netease.nsfw"),
-        'nonage': Params(port=9010, service_name="nonage",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.tupu.nonage"),
+        'nsfw_ensemble': Params(port=8009, service_name="nsfw_ensemble",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.netease.nsfw"),
+        'nonage': Params(port=8010, service_name="nonage",timeout=10,worker_num=2,kafka_topic="apus.three.call.log.tupu.nonage"),
         'cutcut_profile': Params(port=8000, service_name="cutcut_profile", worker_num=2),
     }
     allP=[v for k,v in CONFIG_NEW.items()]
