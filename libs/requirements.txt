@@ -9,4 +9,4 @@ zac-pyutils>=1.59
 django==2.2.5
 timeout_decorator==0.4.1
 gunicorn==19.9.0
-eventlet==0.25.1
+eventlet==0.31.0
