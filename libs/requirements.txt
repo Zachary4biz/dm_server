@@ -6,7 +6,7 @@ tensorflow>=1.14.0
 tensorflow-hub
 keras==2.2.5
 zac-pyutils>=1.59
-django==2.2.5
+django==2.2.24
 timeout_decorator==0.4.1
 gunicorn==19.9.0
 eventlet==0.25.1
